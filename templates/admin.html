@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Admin Dashboard</title>
+	</head>
+	<body>
+		<h1>Admin Dashboard</h1>
+
+		<h2>Judges</h2>
+		<ul>
+			{% for token, data in judges.items() %}
+			<li>
+				{{ data.name }} (Token: {{ token }})
+				<ul>
+					{% for poster_id in data.selected_posters %}
+					<li>
+						Poster {{ poster_id }}
+						<form method="POST" style="display:inline;">
+							<input type="hidden" name="action" value="remove_poster_from_judge">
+							<input type="hidden" name="token" value="{{ token }}">
+							<input type="hidden" name="poster_id" value="{{ poster_id }}">
+							<button type="submit">Remove</button>
+						</form>
+					</li>
+					{% endfor %}
+				</ul>
+				<form method="POST" style="display:inline;">
+					<input type="hidden" name="action" value="delete_judge">
+					<input type="hidden" name="token" value="{{ token }}">
+					<button type="submit">Delete Judge</button>
+				</form>
+			</li>
+			{% endfor %}
+		</ul>
+		<form method="POST">
+			<input type="hidden" name="action" value="add_judge">
+			<input type="text" name="name" placeholder="Judge Name" required>
+			<button type="submit">Add Judge</button>
+		</form>
+
+		<h2>Posters</h2>
+		<ul>
+			{% for poster in posters %}
+			<li>
+				{{ poster.title }} (Max Judges: {{ poster.max_judges }}, Current Judges: {{ poster.current_judges }})
+				<form method="POST" style="display:inline;">
+					<input type="hidden" name="action" value="delete_poster">
+					<input type="hidden" name="poster_id" value="{{ poster.id }}">
+					<button type="submit">Delete</button>
+				</form>
+				<form method="POST" style="display:inline;">
+					<input type="hidden" name="action" value="edit_poster">
+					<input type="hidden" name="poster_id" value="{{ poster.id }}">
+					<input type="text" name="title" value="{{ poster.title }}" required>
+					<input type="number" name="max_judges" value="{{ poster.max_judges }}" required>
+					<button type="submit">Edit</button>
+				</form>
+			</li>
+			{% endfor %}
+		</ul>
+		<form method="POST">
+			<input type="hidden" name="action" value="add_poster">
+			<input type="text" name="title" placeholder="Poster Title" required>
+			<input type="number" name="max_judges" placeholder="Max Judges" required>
+			<button type="submit">Add Poster</button>
+		</form>
+
+		<h2>Poster Assignments</h2>
+		<ul>
+			{% for poster_id, data in poster_assignments.items() %}
+			<li>
+				{{ data.title }}: 
+				{% for judge in data.judges %}
+				{{ judge }},
+				{% endfor %}
+			</li>
+			{% endfor %}
+		</ul>
+
+		<a href="/admin_logout">Logout</a>
+	</body>
+</html>
+
+

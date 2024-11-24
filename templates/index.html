@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Poster Judging System</title>
+	</head>
+	<body>
+		<h1>Welcome</h1>
+		{% if error %}
+			<p style="color: red;">{{ error }}</p>
+		{% endif %}
+		<form method="POST">
+			<input type="text" name="token" placeholder="Enter your token" required>
+			<button type="submit">Login</button>
+		</form>
+		<a href="/admin">Admin Login</a>
+	</body>
+</html>

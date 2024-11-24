@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Judge Panel</title>
+	</head>
+	<body>
+		<h1>Welcome, {{ judge.name }}</h1>
+
+		{% if message %}
+		<p style="color: green;">{{ message }}</p>
+		{% endif %}
+
+		<h2>Your Selected Posters</h2>
+		<ul>
+			{% for poster_id in judge.selected_posters %}
+			<li>
+				Poster {{ poster_id }}
+				<form method="POST" style="display:inline;">
+					<input type="hidden" name="action" value="deselect">
+					<input type="hidden" name="poster_id" value="{{ poster_id }}">
+					<button type="submit">Deselect</button>
+				</form>
+			</li>
+			{% endfor %}
+		</ul>
+
+		<h2>Available Posters</h2>
+		<form method="POST">
+			<select name="poster_id">
+				{% for poster in posters %}
+				<option value="{{ poster.id }}">{{ poster.title }}</option>
+				{% endfor %}
+			</select>
+			<input type="hidden" name="action" value="select">
+			<button type="submit">Select Poster</button>
+		</form>
+
+		<form method="GET" action="/judge_logout">
+			<button type="submit">Logout</button>
+		</form>
+	</body>
+</html>
+
