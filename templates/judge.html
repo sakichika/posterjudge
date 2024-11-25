@@ -2,6 +2,87 @@
 <html>
 	<head>
 		<title>Judge Panel</title>
+		<!-- jQuery -->
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<!-- jquery-modal -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+
+		<!-- CSS for Modals and Cards -->
+		<style>
+			.modal {
+				position: relative; /* ボタンの位置をモーダル内に固定するためにrelativeを指定 */
+				width: 90%; /* デフォルトで画面幅の90%を使用 */
+				max-width: 600px; /* モーダルの最大幅を指定 */
+				margin: auto;
+				padding: 20px;
+				background-color: white;
+				border-radius: 8px;
+				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				overflow-y: auto; /* 内容が長い場合でもスクロール可能にする */
+				max-height: 90vh; /* モーダルの高さを画面の90%以下に制限 */
+			}
+
+			.modal .modal-close {
+				position: absolute; /* モーダルの中での絶対配置 */
+				bottom: 10px; /* 下端から10px */
+				right: 10px; /* 右端から10px */
+				background-color: #ccc;
+				color: black;
+				border: none;
+				padding: 8px 16px;
+				cursor: pointer;
+				border-radius: 4px;
+				font-size: 14px;
+				transition: background-color 0.3s;
+			}
+
+			.modal .modal-close:hover {
+				background-color: #aaa; /* ホバー時の色変更 */
+			}
+
+			/* 入力フィールドのレスポンシブデザイン */
+			.modal input[type="text"],
+			.modal textarea,
+			.modal input[type="number"] {
+				width: 100%; /* フル幅 */
+				box-sizing: border-box; /* パディングを含めたサイズ調整 */
+				margin-bottom: 10px;
+			}
+
+			/* モバイルデバイス向けのスタイル */
+			@media (max-width: 768px) {
+				.modal {
+					width: 90%; /* モバイルではモーダルの幅を拡大 */
+				}
+			}
+
+			/* カードボックスのスタイル */
+			.poster-box {
+				width: calc(50% - 10px); /* 2列レイアウト */
+				background-color: #f9f9f9;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				padding: 15px;
+				cursor: pointer;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				transition: transform 0.2s, box-shadow 0.2s;
+				text-align: center;
+				margin-bottom: 10px;
+			}
+
+			.poster-box:hover {
+				transform: scale(1.02);
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			}
+
+			/* レスポンシブ対応 */
+			@media (max-width: 768px) {
+				.poster-box {
+					width: 100%; /* モバイルでは1列表示 */
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<h1>Welcome, {{ judge.name }}</h1>
@@ -10,34 +91,114 @@
 		<p style="color: green;">{{ message }}</p>
 		{% endif %}
 
+		<!-- Selected Posters -->
 		<h2>Your Selected Posters</h2>
-		<ul>
-			{% for poster_id in judge.selected_posters %}
-			<li>
-				Poster {{ poster_id }}
-				<form method="POST" style="display:inline;">
-					<input type="hidden" name="action" value="deselect">
-					<input type="hidden" name="poster_id" value="{{ poster_id }}">
-					<button type="submit">Deselect</button>
-				</form>
-			</li>
+		<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+			{% for poster in selected_posters %}
+				<div class="poster-box" onclick="openModal('modal-{{ poster.id }}')">
+					<p><strong>{{ poster.number }}</strong></p>
+					<p>{{ poster.presenter }}</p>
+					<p>{{ poster.title }}</p>
+				</div>
+
+				<!-- Deselect モーダル -->
+				<div id="modal-{{ poster.id }}" class="modal">
+					<h2>{{ poster.title }}</h2>
+					<p><strong>Presenter:</strong> {{ poster.presenter }}</p>
+					<p><strong>Abstract:</strong> {{ poster.abstract }}</p>
+					<form method="POST">
+						<input type="hidden" name="action" value="deselect">
+						<input type="hidden" name="poster_id" value="{{ poster.id }}">
+						<button type="submit" style="background-color: #f44336; color: white; border: none; padding: 10px; cursor: pointer;">Deselect Poster</button>
+					</form>
+					<button class="modal-close">Close</button>
+				</div>
+			{% else %}
+				<p>No posters selected.</p>
 			{% endfor %}
-		</ul>
+		</div>
 
+		<!-- Available Posters -->
 		<h2>Available Posters</h2>
-		<form method="POST">
-			<select name="poster_id">
-				{% for poster in posters %}
-				<option value="{{ poster.id }}">{{ poster.title }}</option>
-				{% endfor %}
-			</select>
-			<input type="hidden" name="action" value="select">
-			<button type="submit">Select Poster</button>
-		</form>
+		<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+			{% for poster in available_posters %}
+				{% if poster.id not in judge.selected_posters and poster.current_judges < poster.max_judges %}
+					<div class="poster-box" onclick="openModal('modal-available-{{ poster.id }}')">
+						<p><strong>{{ poster.number }}</strong></p>
+						<p>{{ poster.presenter }}</p>
+						<p>{{ poster.title }}</p>
+					</div>
 
+					<!-- Select モーダル -->
+					<div id="modal-available-{{ poster.id }}" class="modal">
+						<h2>{{ poster.title }}</h2>
+						<p><strong>Presenter:</strong> {{ poster.presenter }}</p>
+						<p><strong>Abstract:</strong> {{ poster.abstract }}</p>
+						<form method="POST">
+							<input type="hidden" name="action" value="select">
+							<input type="hidden" name="poster_id" value="{{ poster.id }}">
+							<button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer;">Select Poster</button>
+						</form>
+						<button class="modal-close">Close</button>
+					</div>
+				{% endif %}
+			{% endfor %}
+		</div>
+
+		<!-- ページネーション -->
+		<div class="pagination">
+			{% if current_page > 1 %}
+				<a href="?page={{ current_page - 1 }}" class="prev">Previous</a>
+			{% endif %}
+			{% for p in range(1, total_pages + 1) %}
+				<a href="?page={{ p }}" class="{% if p == current_page %}active{% endif %}">{{ p }}</a>
+			{% endfor %}
+			{% if current_page < total_pages %}
+				<a href="?page={{ current_page + 1 }}" class="next">Next</a>
+			{% endif %}
+		</div>
+
+		<style>
+		.pagination {
+			margin-top: 20px;
+			text-align: center;
+		}
+
+		.pagination a {
+			display: inline-block;
+			margin: 0 5px;
+			padding: 8px 12px;
+			background-color: #f1f1f1;
+			color: #333;
+			text-decoration: none;
+			border-radius: 4px;
+		}
+
+		.pagination a.active {
+			background-color: #007bff;
+			color: #fff;
+		}
+
+		.pagination a:hover {
+			background-color: #ddd;
+		}
+		</style>
+		<!-- Logout -->
 		<form method="GET" action="/judge_logout">
 			<button type="submit">Logout</button>
 		</form>
+
+		<!-- JavaScript -->
+		<script>
+			// モーダルを開く
+			function openModal(modalId) {
+				$('#' + modalId).modal(); // モーダルを表示
+			}
+
+			// モーダルを閉じる
+			$(document).on('click', '.modal-close', function () {
+				$.modal.close(); // モーダルを閉じる
+			});
+		</script>
 	</body>
 </html>
-

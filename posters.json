@@ -1,1 +1,364 @@
-[{"id": 1, "title": "Poster 1", "max_judges": 3, "current_judges": 1}, {"id": 2, "title": "Poster 2", "max_judges": 3, "current_judges": 1}]
+[
+    {
+        "id": 1,
+        "number": "P-01",
+        "presenter": "Presenter 1",
+        "coauthors": [
+            "Coauthor 1",
+            " Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1"
+        ],
+        "title": "Poster Title 1",
+        "abstract": "This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.",
+        "max_judges": 5,
+        "current_judges": 3
+    },
+    {
+        "id": 2,
+        "number": "P-02",
+        "presenter": "Presenter 2",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1"
+        ],
+        "title": "Poster Title 2",
+        "abstract": "This is the abstract for poster 2.",
+        "max_judges": 3,
+        "current_judges": 1
+    },
+    {
+        "id": 3,
+        "number": "P-03",
+        "presenter": "Presenter 3",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 3",
+        "abstract": "This is the abstract for poster 3.",
+        "max_judges": 5,
+        "current_judges": 3
+    },
+    {
+        "id": 4,
+        "number": "P-04",
+        "presenter": "Presenter 4",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 4",
+        "abstract": "This is the abstract for poster 4.",
+        "max_judges": 2,
+        "current_judges": 2
+    },
+    {
+        "id": 5,
+        "number": "P-05",
+        "presenter": "Presenter 5",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 5",
+        "abstract": "This is the abstract for poster 5.",
+        "max_judges": 5,
+        "current_judges": 4
+    },
+    {
+        "id": 6,
+        "number": "P-06",
+        "presenter": "Presenter 6",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 6",
+        "abstract": "This is the abstract for poster 6.",
+        "max_judges": 4,
+        "current_judges": 4
+    },
+    {
+        "id": 7,
+        "number": "P-07",
+        "presenter": "Presenter 7",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3"
+        ],
+        "affiliations": [
+            "Affiliation 1"
+        ],
+        "title": "Poster Title 7",
+        "abstract": "This is the abstract for poster 7.",
+        "max_judges": 2,
+        "current_judges": 2
+    },
+    {
+        "id": 8,
+        "number": "P-08",
+        "presenter": "Presenter 8",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1"
+        ],
+        "title": "Poster Title 8",
+        "abstract": "This is the abstract for poster 8.",
+        "max_judges": 5,
+        "current_judges": 2
+    },
+    {
+        "id": 9,
+        "number": "P-09",
+        "presenter": "Presenter 9",
+        "coauthors": [
+            "Coauthor 1"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 9",
+        "abstract": "This is the abstract for poster 9.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 10,
+        "number": "P-10",
+        "presenter": "Presenter 10",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 10",
+        "abstract": "This is the abstract for poster 10.",
+        "max_judges": 2,
+        "current_judges": 0
+    },
+    {
+        "id": 11,
+        "number": "P-11",
+        "presenter": "Presenter 11",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 11",
+        "abstract": "This is the abstract for poster 11.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 12,
+        "number": "P-12",
+        "presenter": "Presenter 12",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 12",
+        "abstract": "This is the abstract for poster 12.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 13,
+        "number": "P-13",
+        "presenter": "Presenter 13",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 13",
+        "abstract": "This is the abstract for poster 13.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 14,
+        "number": "P-14",
+        "presenter": "Presenter 14",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 14",
+        "abstract": "This is the abstract for poster 14.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 15,
+        "number": "P-15",
+        "presenter": "Presenter 15",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 15",
+        "abstract": "This is the abstract for poster 15.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 16,
+        "number": "P-16",
+        "presenter": "Presenter 16",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 16",
+        "abstract": "This is the abstract for poster 16.",
+        "max_judges": 3,
+        "current_judges": 0
+    },
+    {
+        "id": 17,
+        "number": "P-17",
+        "presenter": "Presenter 17",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 17",
+        "abstract": "This is the abstract for poster 17.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 18,
+        "number": "P-18",
+        "presenter": "Presenter 18",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 18",
+        "abstract": "This is the abstract for poster 18.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 19,
+        "number": "P-19",
+        "presenter": "Presenter 19",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1"
+        ],
+        "title": "Poster Title 19",
+        "abstract": "This is the abstract for poster 19.",
+        "max_judges": 2,
+        "current_judges": 0
+    },
+    {
+        "id": 20,
+        "number": "P-20",
+        "presenter": "Presenter 20",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 20",
+        "abstract": "This is the abstract for poster 20.",
+        "max_judges": 5,
+        "current_judges": 0
+    }
+]

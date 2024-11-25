@@ -2,89 +2,339 @@
 <html>
 	<head>
 		<title>Admin Dashboard</title>
+		<!-- jQuery -->
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<!-- jquery-modal -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+		<style>
+			/* モーダル全体のスタイル */
+			.modal {
+				width: 80%; /* モーダルの幅を画面サイズに応じて設定 */
+				max-width: 600px; /* モーダルの最大幅を指定 */
+				margin: auto;
+				padding: 20px;
+			}
+	
+			/* 入力フィールドのレスポンシブデザイン */
+			.modal input[type="text"],
+			.modal textarea,
+			.modal input[type="number"] {
+				width: 100%; /* フル幅 */
+				max-width: 100%; /* 最大幅を親要素に依存 */
+				box-sizing: border-box; /* パディングを含めたサイズ調整 */
+				margin-bottom: 10px;
+			}
+	
+			/* モバイルデバイス向けのスタイル */
+			@media (max-width: 768px) {
+				.modal {
+					width: 90%; /* モバイルではモーダルの幅を拡大 */
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<h1>Admin Dashboard</h1>
 
 		<h2>Judges</h2>
-<ul>
-    {% for token, data in judges.items() %}
-        <li>
-            {{ data.name }} (Token: {{ token }})
-            <form method="POST" style="display:inline;">
-                <input type="hidden" name="action" value="edit_judge_name">
-                <input type="hidden" name="token" value="{{ token }}">
-                <input type="text" name="new_name" placeholder="New Name" required>
-                <button type="submit">Edit Name</button>
-            </form>
-            <ul>
-                {% for poster_id in data.selected_posters %}
-                    <li>
-                        Poster {{ poster_id }}
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="action" value="remove_poster_from_judge">
-                            <input type="hidden" name="token" value="{{ token }}">
-                            <input type="hidden" name="poster_id" value="{{ poster_id }}">
-                            <button type="submit">Remove</button>
-                        </form>
-                    </li>
-                {% endfor %}
-            </ul>
-            <form method="POST" style="display:inline;">
-                <input type="hidden" name="action" value="delete_judge">
-                <input type="hidden" name="token" value="{{ token }}">
-                <button type="submit">Delete Judge</button>
-            </form>
-        </li>
-    {% endfor %}
-</ul>
-<form method="POST">
-    <input type="hidden" name="action" value="add_judge">
-    <input type="text" name="name" placeholder="Judge Name" required>
-    <button type="submit">Add Judge</button>
-</form>
+		<ul>
+			{% for token, data in judges.items() %}
+				<li>
+					<a href="#modal-judge-{{ token }}" rel="modal:open">{{ data.name }}</a> (Token: {{ token }})
+					<!-- 審査員情報編集モーダル -->
+					<div id="modal-judge-{{ token }}" class="modal">
+						<h2>Edit Judge: {{ data.name }}</h2>
+						<form method="POST">
+							<input type="hidden" name="action" value="edit_judge_name">
+							<input type="hidden" name="token" value="{{ token }}">
+							<label for="new-name-{{ token }}">New Name:</label>
+							<input type="text" id="new-name-{{ token }}" name="new_name" value="{{ data.name }}" required>
+							<br>
+							<button type="submit">Save Changes</button>
+						</form>
+						<form method="POST" action="/admin/regenerate_token" style="margin-top: 10px;">
+							<input type="hidden" name="old_token" value="{{ token }}">
+							<button type="submit">Regenerate Token</button>
+						</form>
+						<form method="POST" style="margin-top: 10px;">
+							<input type="hidden" name="action" value="delete_judge">
+							<input type="hidden" name="token" value="{{ token }}">
+							<button type="submit" style="color: red;">Delete Judge</button>
+						</form>
+
+						<h3>Selected Posters</h3>
+						<ul id="selected-posters-{{ token }}">
+							{% for poster_id in data.selected_posters %}
+								{% for poster in posters %}
+									{% if poster.id == poster_id %}
+										<li id="poster-{{ poster.id }}">
+											{{ poster.number }} - {{ poster.presenter }} - {{ poster.title }}
+											<form method="POST" style="display:inline;" class="deselect-form">
+												<input type="hidden" name="action" value="remove_poster_from_judge">
+												<input type="hidden" name="token" value="{{ token }}">
+												<input type="hidden" name="poster_id" value="{{ poster.id }}">
+												<button type="submit" style="color: red;">Remove</button>
+											</form>
+										</li>
+									{% endif %}
+								{% endfor %}
+							{% endfor %}
+						</ul>
+
+						<h3>Add Poster to Judge</h3>
+						<form method="POST" class="assign-form" id="assign-form-{{ token }}" action="">
+							<input type="hidden" name="action" value="assign_poster_to_judge">
+							<input type="hidden" name="token" value="{{ token }}">
+							<label for="assign-poster-{{ token }}">Select Poster:</label>
+							<select id="assign-poster-{{ token }}" name="poster_id">
+								{% for poster in posters %}
+									{% if poster.current_judges < poster.max_judges and poster.id not in data.selected_posters %}
+										<option value="{{ poster.id }}">{{ poster.number }} - {{ poster.presenter }} - {{ poster.title }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+							<br>
+							<button type="submit">Assign Poster</button>
+						</form>
+						<button class="modal-close">Close</button>
+					</div>
+				</li>
+			{% endfor %}
+		</ul>
+
+		<script>
+			// 非同期でdeselectを実行
+			$(document).on("submit", ".deselect-form", function (e) {
+				e.preventDefault();
+				const form = $(this);
+				$.post(form.attr("action") || window.location.href, form.serialize(), function () {
+					const li = form.closest("li");
+					li.remove(); // リストから削除
+				}).fail(function () {
+					alert("Failed to deselect the poster.");
+				});
+			});
+
+			// 非同期でassignを実行
+			$(document).on("submit", ".assign-form", function (e) {
+				e.preventDefault();
+				const form = $(this);
+				const token = form.find('input[name="token"]').val();
+				$.post(form.attr("action") || window.location.href, form.serialize(), function (response) {
+					const selectedPosterId = form.find("select[name='poster_id']").val();
+					const selectedPosterText = form.find("select[name='poster_id'] option:selected").text();
+
+					// 新しいポスターを選択リストに追加
+					const newPoster = `
+						<li id="poster-${selectedPosterId}">
+							${selectedPosterText}
+							<form method="POST" style="display:inline;" class="deselect-form" action="">
+								<input type="hidden" name="action" value="remove_poster_from_judge">
+								<input type="hidden" name="token" value="${token}">
+								<input type="hidden" name="poster_id" value="${selectedPosterId}">
+								<button type="submit" style="color: red;">Remove</button>
+							</form>
+						</li>`;
+					$(`#selected-posters-${token}`).append(newPoster);
+
+					// ドロップダウンから選択済みポスターを削除
+					form.find(`select[name="poster_id"] option[value="${selectedPosterId}"]`).remove();
+				}).fail(function () {
+					alert("Failed to assign the poster.");
+				});
+			});
+		</script>
+
+		<!-- 新しい審査員を追加するフォーム -->
+		<a href="#modal-add-judge" rel="modal:open">Add New Judge</a>
+		<div id="modal-add-judge" class="modal">
+			<h2>Add New Judge</h2>
+			<form method="POST">
+				<input type="hidden" name="action" value="add_judge">
+				<label for="judge-name">Judge Name:</label>
+				<input type="text" id="judge-name" name="name" placeholder="Judge Name" required>
+				<br>
+				<button type="submit">Add Judge</button>
+			</form>
+			<button class="modal-close">Close</button>
+		</div>
+
 
 		<h2>Posters</h2>
 		<ul>
 			{% for poster in posters %}
-			<li>
-				{{ poster.title }} (Max Judges: {{ poster.max_judges }}, Current Judges: {{ poster.current_judges }})
-				<form method="POST" style="display:inline;">
-					<input type="hidden" name="action" value="delete_poster">
-					<input type="hidden" name="poster_id" value="{{ poster.id }}">
-					<button type="submit">Delete</button>
-				</form>
-				<form method="POST" style="display:inline;">
-					<input type="hidden" name="action" value="edit_poster">
-					<input type="hidden" name="poster_id" value="{{ poster.id }}">
-					<input type="text" name="title" value="{{ poster.title }}" required>
-					<input type="number" name="max_judges" value="{{ poster.max_judges }}" required>
-					<button type="submit">Edit</button>
-				</form>
-			</li>
-			{% endfor %}
-		</ul>
-		<form method="POST">
-			<input type="hidden" name="action" value="add_poster">
-			<input type="text" name="title" placeholder="Poster Title" required>
-			<input type="number" name="max_judges" placeholder="Max Judges" required>
-			<button type="submit">Add Poster</button>
-		</form>
+				<li>
+					<a href="#modal-poster-{{ poster.id }}" rel="modal:open">
+						{{ poster.title }}
+					</a>
+					<!-- モーダル開始 -->
+					<div id="modal-poster-{{ poster.id }}" class="modal">
+						<h2>Edit Poster</h2>
+						<form method="POST" class="edit-poster-form">
+							<input type="hidden" name="action" value="edit_poster">
+							<input type="hidden" name="poster_id" value="{{ poster.id }}">
+				
+							<label for="poster-title-{{ poster.id }}">Title:</label>
+							<textarea id="poster-title-{{ poster.id }}" name="title" rows="1" placeholder="Enter Title">{{ poster.title }}</textarea>
+				
+							<label for="poster-number-{{ poster.id }}">Number:</label>
+							<input type="text" id="poster-number-{{ poster.id }}" name="number" value="{{ poster.number }}" placeholder="Enter Poster Number">
+				
+							<label for="poster-presenter-{{ poster.id }}">Presenter:</label>
+							<input type="text" id="poster-presenter-{{ poster.id }}" name="presenter" value="{{ poster.presenter }}" placeholder="Enter Presenter Name">
+				
+							<label for="poster-coauthors-{{ poster.id }}">Coauthors:</label>
+							<textarea id="poster-coauthors-{{ poster.id }}" name="coauthors" rows="1" placeholder="Enter Coauthors, separated by commas">{{ poster.coauthors | join(', ') }}</textarea>
+				
+							<label for="poster-affiliations-{{ poster.id }}">Affiliations:</label>
+							<textarea id="poster-affiliations-{{ poster.id }}" name="affiliations" rows="1" placeholder="Enter Affiliations, separated by commas">{{ poster.affiliations | join(', ') }}</textarea>
+				
+							<label for="poster-abstract-{{ poster.id }}">Abstract:</label>
+							<textarea id="poster-abstract-{{ poster.id }}" name="abstract" rows="4" placeholder="Enter Abstract">{{ poster.abstract }}</textarea>
+				
+							<label for="poster-max-judges-{{ poster.id }}">Max Judges:</label>
+							<input type="number" id="poster-max-judges-{{ poster.id }}" name="max_judges" value="{{ poster.max_judges }}" placeholder="Enter Max Judges">
+				
+							<button type="submit">Save Changes</button>
+						</form>
 
-		<h2>Poster Assignments</h2>
-		<ul>
-			{% for poster_id, data in poster_assignments.items() %}
-			<li>
-				{{ data.title }}: 
-				{% for judge in data.judges %}
-				{{ judge }},
-				{% endfor %}
-			</li>
+						<h3>Assigned Judges</h3>
+						<ul>
+							{% for token, judge in judges.items() %}
+								{% if poster.id in judge.selected_posters %}
+									<li>
+										{{ judge.name }}
+										<form method="POST" class="remove-judge-form" style="display:inline;">
+											<input type="hidden" name="action" value="remove_poster_from_judge">
+											<input type="hidden" name="token" value="{{ token }}">
+											<input type="hidden" name="poster_id" value="{{ poster.id }}">
+											<button type="submit" style="color: red;">Remove</button>
+										</form>
+									</li>
+								{% endif %}
+							{% endfor %}
+						</ul>
+
+						<form method="POST" class="delete-poster-form">
+							<input type="hidden" name="action" value="delete_poster">
+							<input type="hidden" name="poster_id" value="{{ poster.id }}">
+							<button type="submit" style="color: red;">Delete Poster</button>
+						</form>
+
+						<button class="modal-close">Close</button>
+					</div>
+				</li>
 			{% endfor %}
 		</ul>
+		<script>
+			// 非同期でポスター編集を実行
+			$(document).on("submit", ".edit-poster-form", function (e) {
+				e.preventDefault();
+				const form = $(this);
+				$.post(form.attr("action") || window.location.href, form.serialize(), function () {
+					const li = form.closest("li");
+					li.remove();
+				}).fail(function () {
+					alert("Failed to update the poster.");
+				});
+			});
+
+			$(document).on("submit", ".delete-poster-form", function (e) {
+				e.preventDefault();
+				const form = $(this);
+				$.post(form.attr("action") || window.location.href, form.serialize(), function (response) {
+					alert("Poster deleted successfully!");
+					location.reload();
+				}).fail(function (xhr, status, error) {
+					console.error("Error:", xhr.responseText);
+					alert("Failed to delete the poster.");
+				});
+			});
+		
+			// 非同期で審査員の割り当てを削除
+			$(document).on("submit", ".remove-judge-form", function (e) {
+				e.preventDefault();
+				const form = $(this);
+				$.post(form.attr("action") || window.location.href, form.serialize(), function () {
+					form.closest("li").remove();
+				}).fail(function () {
+					alert("Failed to remove judge.");
+				});
+			});
+		</script>
+
+		<a href="#modal-add-poster" rel="modal:open">Add New Poster</a>
+		<div id="modal-add-poster" class="modal">
+			<h2>Add New Poster</h2>
+			<form method="POST" class="add-poster-form">
+				<input type="hidden" name="action" value="add_poster">
+
+				<label for="poster-title">Title:</label>
+				<textarea id="poster-title" name="title" rows="1" placeholder="Enter Title" required></textarea>
+
+				<label for="poster-number">Number (P-000):</label>
+				<input type="text" id="poster-number" name="number" placeholder="Enter Poster Number" required>
+
+				<label for="poster-presenter">Presenter:</label>
+				<input type="text" id="poster-presenter" name="presenter" placeholder="Enter Presenter Name" required>
+
+				<label for="poster-coauthors">Coauthors:</label>
+				<textarea id="poster-coauthors" name="coauthors" rows="1" placeholder="Enter Coauthors, separated by commas"></textarea>
+
+				<label for="poster-affiliations">Affiliations:</label>
+				<textarea id="poster-affiliations" name="affiliations" rows="1" placeholder="Enter Affiliations, separated by commas"></textarea>
+
+				<label for="poster-abstract">Abstract:</label>
+				<textarea id="poster-abstract" name="abstract" rows="4" placeholder="Enter Abstract"></textarea>
+
+				<label for="poster-max-judges">Max Judges:</label>
+				<input type="number" id="poster-max-judges" name="max_judges" placeholder="Enter Max Judges" required>
+
+				<button type="submit">Add Poster</button>
+			</form>
+			<button class="modal-close">Close</button>
+		</div>
+
+		<script>
+			// 非同期処理を使用してポスターを追加
+			$(document).on("submit", ".add-poster-form", function (e) {
+				e.preventDefault();
+				const form = $(this);
+				$.post(form.attr("action") || window.location.href, form.serialize(), function () {
+					alert("Poster added successfully!");
+					location.reload(); // 成功時にページをリロード
+				}).fail(function () {
+					alert("Failed to add the poster.");
+				});
+			});
+		</script>
+
+
+		<!-- モーダル内容 -->
+		{% for poster in posters %}
+			<div id="modal-{{ poster.id }}" class="modal">
+				<h2>{{ poster.title }}</h2>
+				<p><strong>Number:</strong> {{ poster.number }}</p>
+				<p><strong>Presenter:</strong> {{ poster.presenter }}</p>
+				<p><strong>Coauthors:</strong> {{ poster.coauthors | join(', ') }}</p>
+				<p><strong>Affiliations:</strong> {{ poster.affiliations | join(', ') }}</p>
+				<p><strong>Abstract:</strong> {{ poster.abstract }}</p>
+				<p><strong>Max Judges:</strong> {{ poster.max_judges }}</p>
+				<p><strong>Current Judges:</strong> {{ poster.current_judges }}</p>
+				<button class="modal-close">Close</button>
+			</div>
+		{% endfor %}
+
+		<h2>Logout</h2>
 
 		<a href="/admin_logout">Logout</a>
+
+		<script>
+			// jQueryでモーダルを手動で閉じるスクリプト
+			$(document).on('click', '.modal-close', function () {
+				$.modal.close(); // 手動でモーダルを閉じる
+			});
+		</script>
 	</body>
 </html>
-
-

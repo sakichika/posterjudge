@@ -8,9 +8,11 @@
 		{% if error %}
 			<p style="color: red;">{{ error }}</p>
 		{% endif %}
-		<form method="POST">
-			<input type="text" name="username" placeholder="Username" required>
-			<input type="password" name="password" placeholder="Password" required>
+		<form method="POST" action="/admin">
+			<label for="username">Username:</label>
+			<input type="text" id="username" name="username" required>
+			<label for="password">Password:</label>
+			<input type="password" id="password" name="password" required>
 			<button type="submit">Login</button>
 		</form>
 	</body>

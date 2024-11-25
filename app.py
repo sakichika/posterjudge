@@ -1,8 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import asyncio
+import threading
+from math import ceil
+
+lock = threading.Lock()
 
 import os
 import json
+import random
+import string
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -28,7 +34,7 @@ def load_posters():
 # Save posters to JSON
 def save_posters(posters):
     with open(POSTERS_FILE, "w") as f:
-        json.dump(posters, f)
+        json.dump(posters, f, indent=4)
 
 # Load judges from JSON
 def load_judges():
@@ -38,19 +44,18 @@ def load_judges():
         return {}
 
 # Save judges to JSON
-def save_judges(judges):
-    with open(JUDGES_FILE, "w") as f:
-        json.dump(judges, f)
+def save_judges(judges_data):
+    with open("judges.json", "w") as file:
+        json.dump(judges_data, file, indent=4)
 
 # Initialize judges dictionary
 judges = load_judges()
 posters = load_posters()
 
 # Generate random token
-def generate_token():
-    import random
-    import string
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+def generate_token(length=16):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choices(characters, k=length))
 
 # Routes
 @app.route("/", methods=["GET", "POST"])
@@ -66,51 +71,77 @@ def index():
 @app.route("/admin", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        username = request.form.get("username")
+        password = request.form.get("password")
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session["admin"] = True
-            return redirect(url_for("admin_dashboard"))
+            print("Login successful")
+            return redirect(url_for("admin_dashboard"))  # 管理画面にリダイレクト
         else:
+            print("Login failed: Invalid credentials")
             return render_template("admin_login.html", error="Invalid credentials.")
+    
+    print("Rendering login page")
     return render_template("admin_login.html")
 
 @app.route("/admin/dashboard", methods=["GET", "POST"])
 def admin_dashboard():
     if not session.get("admin"):
         return redirect(url_for("admin_login"))
-
-    # POSTリクエストで審査員またはポスターを操作
+    
     if request.method == "POST":
-        action = request.form["action"]
+        action = request.form.get("action")
 
         if action == "add_judge":
-            name = request.form["name"]
+            name = request.form.get("name")
             token = generate_token()
             judges[token] = {"name": name, "selected_posters": []}
             save_judges(judges)
 
         elif action == "edit_judge_name":
-            token = request.form["token"]
-            new_name = request.form["new_name"]
+            token = request.form.get("token")
+            new_name = request.form.get("new_name")
             if token in judges:
                 judges[token]["name"] = new_name
                 save_judges(judges)
-        
-        elif action == "delete_judge":
-            token = request.form["token"]
-            if token in judges:        
-                # 審査員が選択したポスターのカウントを減少
-                for poster_id in judges[token]["selected_posters"]:
-                    poster = next((p for p in posters if p["id"] == poster_id), None)
-                    if poster:
-                        poster["current_judges"] -= 1
-                del judges[token]
-                save_judges(judges)
+
+        elif action == "delete_poster":
+            try:
+                poster_id = int(request.form.get("poster_id", 0))  # デフォルト値を0に設定
+                if poster_id == 0:
+                    return "Invalid poster ID1", 400
+
+                # ポスターの削除
+                poster_to_delete = next((p for p in posters if p["id"] == poster_id), None)
+                if not poster_to_delete:
+                    return "Poster not found", 404
+
+                posters.remove(poster_to_delete)
+
+                # 削除したポスターを選択していた審査員からも削除
+                for token in judges:
+                    if poster_id in judges[token]["selected_posters"]:
+                        judges[token]["selected_posters"].remove(poster_id)
+
                 save_posters(posters)
+                save_judges(judges)
+                return "Poster deleted successfully", 200
+            except ValueError:
+                return "Invalid poster ID2", 400
+
+
+        elif action == "regenerate_token":
+            old_token = request.form.get("old_token")
+            if old_token in judges:
+                new_token = generate_token(16)
+                while new_token in judges:
+                    new_token = generate_token(16)
+                judges[new_token] = judges.pop(old_token)
+                save_judges(judges)
+
         elif action == "remove_poster_from_judge":
-            token = request.form["token"]
-            poster_id = int(request.form["poster_id"])
+            token = request.form.get("token")
+            poster_id = int(request.form.get("poster_id"))
             if token in judges and poster_id in judges[token]["selected_posters"]:
                 judges[token]["selected_posters"].remove(poster_id)
                 poster = next((p for p in posters if p["id"] == poster_id), None)
@@ -118,48 +149,114 @@ def admin_dashboard():
                     poster["current_judges"] -= 1
                 save_judges(judges)
                 save_posters(posters)
-        
+
         elif action == "add_poster":
-            title = request.form["title"]
-            max_judes = int(request.form["max_judges"])    
+            title = request.form.get("title")
+            max_judges = int(request.form.get("max_judges"))
             new_id = max(p["id"] for p in posters) + 1 if posters else 1
             posters.append({"id": new_id, "title": title, "max_judges": max_judges, "current_judges": 0})
             save_posters(posters)
 
         elif action == "delete_poster":
-            poster_id = int(request.form["poster_id"])
+            poster_id = int(request.form.get("poster_id"))
             posters[:] = [p for p in posters if p["id"] != poster_id]
-            # 削除したポスターを選択していた審査員のリストを更新
             for token in judges:
                 if poster_id in judges[token]["selected_posters"]:
                     judges[token]["selected_posters"].remove(poster_id)
-            save_poters(posters)
+            save_posters(posters)
             save_judges(judges)
 
         elif action == "edit_poster":
-            poster_id = int(request.form["poster_id"])
-            new_title = request.form["title"]
-            new_max_judges = int(request.form["max_judges"])
-            poster = next((p for p in posters if p["id"] == poster_id), None)
-            if poster:
-                poser["title"] = new_title
-                poster["max_judges"] = new_max_judges
-                save_posters(posters)
+            try:
+                poster_id = int(request.form["poster_id"])
+                poster = next((p for p in posters if p["id"] == poster_id), None)
 
-    # 審査状況の作成
+                if poster:
+                    # 更新されたデータを取得
+                    poster["number"] = request.form["number"]
+                    poster["title"] = request.form["title"]
+                    poster["presenter"] = request.form["presenter"]
+                    poster["coauthors"] = request.form["coauthors"].split(",")  # カンマ区切りの文字列をリストに変換
+                    poster["affiliations"] = request.form["affiliations"].split(",")
+                    poster["abstract"] = request.form["abstract"]
+                    poster["max_judges"] = int(request.form["max_judges"])
+
+                    # 保存
+                    save_posters(posters)
+                    message = f"Poster {poster_id} updated successfully!"
+                else:
+                    message = f"Poster {poster_id} not found."
+            except Exception as e:
+                message = f"Error updating poster: {str(e)}"
+
+    # 名前順でソートされた審査員リストを生成
+    sorted_judges = dict(sorted(judges.items(), key=lambda item: item[1]["name"]))
+
+    # 審査状況を生成
     poster_assignments = {p["id"]: {"title": p["title"], "judges": []} for p in posters}
-    for token, data in judges.items():
+    for token, data in sorted_judges.items():
         for poster_id in data["selected_posters"]:
             if poster_id in poster_assignments:
-                poster_assignments[poster_id]["judges"].append(judges[token]["name"])
+                poster_assignments[poster_id]["judges"].append(data["name"])
 
     return render_template(
         "admin.html",
+        judges=sorted_judges,
         posters=posters,
-        judges=judges,
         poster_assignments=poster_assignments,
     )
 
+
+@app.route("/admin", methods=["GET", "POST"])
+def admin_panel():
+    if request.method == "POST":
+        action = request.form.get("action")
+        
+        # 審査員の名前を編集
+        if action == "edit_judge_name":
+            token = request.form.get("token")
+            new_name = request.form.get("new_name")
+            if token in judges:
+                judges[token]["name"] = new_name
+                save_judges(judges)
+
+        # トークンを再生成
+        elif action == "regenerate_token":
+            old_token = request.form.get("old_token")
+            if old_token in judges:
+                new_token = generate_token(16)
+                while new_token in judges:  # 一意性を保証
+                    new_token = generate_token(16)
+                judges[new_token] = judges.pop(old_token)
+                save_judges(judges)
+
+    # 名前順でソートされた審査員リストを作成
+    sorted_judges = dict(sorted(judges.items(), key=lambda item: item[1]["name"]))
+
+    # テンプレートにデータを渡す
+    return render_template("admin.html", judges=sorted_judges, posters=posters)
+
+@app.route("/admin/regenerate_token", methods=["POST"])
+def regenerate_token():
+    old_token = request.form.get("old_token")
+    
+    # トークンが存在しない場合の処理
+    if old_token not in judges:
+        print(f"Token {old_token} not found in judges.")
+        return "Invalid token", 400
+
+    # 新しいトークン生成
+    new_token = generate_token(16)
+    while new_token in judges:  # 一意性の保証
+        new_token = generate_token(16)
+
+    # データの更新
+    judges[new_token] = judges.pop(old_token)
+    print(f"Token regenerated: {old_token} -> {new_token}")
+
+    # データ保存
+    save_judges(judges)
+    return redirect("/admin/dashboard")
 
 @app.route("/admin_logout")
 def admin_logout():
@@ -175,57 +272,90 @@ def generate_judge_token():
     return jsonify({"token": token})
 
 @app.route("/judge/<token>", methods=["GET", "POST"])
-async def judge_page(token):
+def judge_page(token):
     if token not in judges:
         return "Invalid token", 403
-    
+
     judge_data = judges[token]
+    judge_data["selected_posters"] = [int(poster_id) for poster_id in judge_data["selected_posters"]]
+
+    # ページネーション関連
+    page = int(request.args.get("page", 1))  # 現在のページ
+    per_page = 10  # 1ページあたりのポスター数
+    total_pages = ceil(len(posters) / per_page)
+
+    start_idx = (page - 1) * per_page
+    end_idx = min(start_idx + per_page, len(posters))  # 範囲を安全に制限
+
+    # ページごとのポスターを取得
+    available_posters = posters[start_idx:end_idx]
+
+    # 選択済みポスター
+    selected_posters = [
+        p for p in posters if p["id"] in judge_data["selected_posters"]
+    ]
+
     message = None
-    
+
     if request.method == "POST":
         action = request.form.get("action")
-        poster_id = int(request.form.get("poster_id",0))
+        try:
+            poster_id = int(request.form.get("poster_id", 0))
+        except ValueError:
+            message = "Invalid poster ID."
+            return render_template("judge.html", judge=judge_data, selected_posters=selected_posters_data, posters=available_posters, message=message)
+
+        poster = next((p for p in posters if p["id"] == poster_id), None)
 
         if action == "select":
-            # Check if already selected
             if poster_id in judge_data["selected_posters"]:
                 message = "You have already selected this poster."
-            # Check if selection limit is reached
-            elif len(judge_data["selected_posters"]) >= app.config["MAX_POSTERS_PER_JUDGE"]:
+            elif len(judge_data["selected_posters"]) >= app.config.get("MAX_POSTERS_PER_JUDGE", 5):
                 message = "You have reached your selection limit."
+            elif poster and poster["current_judges"] < poster["max_judges"]:
+                with lock:
+                    poster["current_judges"] += 1
+                    judge_data["selected_posters"].append(poster_id)
+                    save_posters(posters)
+                    save_judges(judges)
+                message = "Poster selected successfully!"
             else:
-                # Fetch poster and check if it's available
-                poster = next((p for p in posters if p["id"] == poster_id), None)
-                if poster and poster["current_judges"] < poster["max_judges"]:
-                    # Update poster and judge data
-                    async with asyncio.Lock():  # Ensures synchronous updates
-                        poster["current_judges"] += 1
-                        judge_data["selected_posters"].append(poster_id)
-                        save_judges(judges)
-                        save_posters(posters)
-                    message = "Poster selected successfully!"
-                else:
-                    message = "This poster has reached its selection limit."
+                message = "This poster has reached its selection limit."
 
         elif action == "deselect":
             if poster_id in judge_data["selected_posters"]:
-                async with asyncio.Lock():
+                with lock:
                     judge_data["selected_posters"].remove(poster_id)
-                    poster = next((p for p in posters if p["id"] == poster_id), None)
                     if poster:
                         poster["current_judges"] -= 1
-                        save_judges(judges)
                         save_posters(posters)
+                        save_judges(judges)
                 message = "Poster deselected successfully!"
             else:
                 message = "You have not selected this poster."
-    
 
-     # Exclude already selected posters from available posters
-    available_posters = [
+        # 更新された選択済みポスターと利用可能ポスターを再計算
+        selected_posters_data = [
+            p for p in posters if p["id"] in judge_data["selected_posters"]
+        ]
+        available_posters = [
             p for p in posters if p["current_judges"] < p["max_judges"] and p["id"] not in judge_data["selected_posters"]
-            ]
-    return render_template("judge.html", judge=judge_data, posters=available_posters, message=message)
+        ]
+    
+    # デバッグ用ログ
+    print(f"Page: {page}, Start Index: {start_idx}, End Index: {end_idx}")
+    print(f"Available Posters: {[p['id'] for p in available_posters]}")
+
+    return render_template(
+        "judge.html",
+        judge=judge_data,
+        selected_posters=selected_posters,
+        available_posters=available_posters,  # 修正点: ページごとのポスターリストを渡す
+        current_page=page,
+        total_pages=total_pages,
+        message=message
+    )
+
 
 @app.route("/judge_logout")
 def judge_logout():
