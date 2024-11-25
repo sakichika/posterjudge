@@ -89,6 +89,14 @@ def admin_dashboard():
             token = generate_token()
             judges[token] = {"name": name, "selected_posters": []}
             save_judges(judges)
+
+        elif action == "edit_judge_name":
+            token = request.form["token"]
+            new_name = request.form["new_name"]
+            if token in judges:
+                judges[token]["name"] = new_name
+                save_judges(judges)
+        
         elif action == "delete_judge":
             token = request.form["token"]
             if token in judges:        
@@ -146,10 +154,10 @@ def admin_dashboard():
                 poster_assignments[poster_id]["judges"].append(judges[token]["name"])
 
     return render_template(
-            "admin.html",
-            posters=posters,
-            judges=judges,
-            poster_assignments=poster_assignments,
+        "admin.html",
+        posters=posters,
+        judges=judges,
+        poster_assignments=poster_assignments,
     )
 
 
