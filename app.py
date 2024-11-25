@@ -16,7 +16,7 @@ JUDGES_FILE = "judges.json"
 POSTERS_FILE = "posters.json"
 
 # Default settings
-app.config["MAX_POSTERS_PER_JUDGE"] = 3
+app.config["MAX_POSTERS_PER_JUDGE"] = 6
 
 # Load posters from JSON
 def load_posters():
