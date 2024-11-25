@@ -23,7 +23,7 @@ def load_posters():
     if os.path.exists(POSTERS_FILE):
         with open(POSTERS_FILE, "r") as f:
             return json.load(f)
-    return [{"id": i, "title": f"Poster {i}", "max_judges": 3, "current_judges": 0} for i in range(1, 11)]
+    return [{"id": i, "title": f"Poster {i}", "max_judges": 6, "current_judges": 0} for i in range(1, 11)]
 
 # Save posters to JSON
 def save_posters(posters):
