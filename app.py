@@ -10,7 +10,7 @@ from flask_session import Session
 REDIS_URL = os.getenv("REDIS_URL")
 
 # Redisクライアントを初期化
-redis_client = redis.Redis.from_url(REDIS_URL)
+redis_client = Redis.from_url(REDIS_URL)
 
 # 動作確認: 接続テスト
 try:
