@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
+from io import BytesIO
+import pandas as pd
 import asyncio
 import threading
 from math import ceil
@@ -31,6 +33,21 @@ def load_posters():
             return json.load(f)
     return [{"id": i, "title": f"Poster {i}", "max_judges": 6, "current_judges": 0} for i in range(1, 21)]
 
+def update_current_judges():
+    # 全てのポスターのcurrent_judgesをリセット
+    for poster in posters:
+        poster["current_judges"] = 0
+
+    # judges.jsonから現在の割り当てを再計算
+    for judge in judges.values():
+        for poster_id in judge["selected_posters"]:
+            poster = next((p for p in posters if p["id"] == poster_id), None)
+            if poster:
+                poster["current_judges"] += 1
+
+    # 更新後に保存
+    save_posters(posters)
+
 # Save posters to JSON
 def save_posters(posters):
     with open(POSTERS_FILE, "w") as f:
@@ -43,10 +60,14 @@ def load_judges():
             return json.load(f)
         return {}
 
-# Save judges to JSON
 def save_judges(judges_data):
-    with open("judges.json", "w") as file:
-        json.dump(judges_data, file, indent=4)
+    try:
+        with open(JUDGES_FILE, "w") as file:
+            json.dump(judges_data, file, indent=4)
+            print(f"Judges successfully saved to {JUDGES_FILE}")
+    except Exception as e:
+        print(f"Error saving judges: {e}")
+
 
 # Initialize judges dictionary
 judges = load_judges()
@@ -104,6 +125,19 @@ def admin_dashboard():
             if token in judges:
                 judges[token]["name"] = new_name
                 save_judges(judges)
+        
+        elif action == "delete_judge":
+            token = request.form["token"]
+            if token in judges:
+                # 削除する審査員が選択したポスターを更新
+                for poster_id in judges[token]["selected_posters"]:
+                    poster = next((p for p in posters if p["id"] == poster_id), None)
+                    if poster:
+                        poster["current_judges"] -= 1  # 選択中のポスター数を減少
+                # 審査員を削除
+                del judges[token]
+                save_judges(judges)
+                save_posters(posters)
 
         elif action == "delete_poster":
             try:
@@ -199,11 +233,27 @@ def admin_dashboard():
             if poster_id in poster_assignments:
                 poster_assignments[poster_id]["judges"].append(data["name"])
 
+    # ページネーション関連
+    page = int(request.args.get("page", 1))
+
+    try:
+        page = int(page)  # ページ番号を整数に変換
+    except ValueError:
+        page = 1  # ページ番号が無効な場合は1に戻す
+    
+    per_page = 10
+    total_pages = ceil(len(posters) / per_page)
+
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    available_posters = posters[start_idx:end_idx]
+
     return render_template(
         "admin.html",
         judges=sorted_judges,
-        posters=posters,
-        poster_assignments=poster_assignments,
+        posters=available_posters,
+        current_page=page,
+        total_pages=total_pages,
     )
 
 
@@ -258,6 +308,156 @@ def regenerate_token():
     save_judges(judges)
     return redirect("/admin/dashboard")
 
+@app.route("/upload/judges", methods=["POST"])
+def upload_judges():
+
+    file = request.files.get("file")
+    if not file:
+        return "No file uploaded", 400
+
+    try:
+        # 読み込んだ Excel ファイルを DataFrame に変換
+        df = pd.read_excel(file)
+        for _, row in df.iterrows():
+            name = row.get("Name")
+            email = row.get("Email", "")
+            if name:  # 名前が必須
+                token = generate_token()
+                judges[token] = {"name": name, "email": email, "selected_posters": []}
+        save_judges(judges)
+        return redirect(url_for("admin_dashboard"))
+    except Exception as e:
+        return f"Error processing file: {e}", 400
+
+@app.route("/upload/posters", methods=["POST"])
+def upload_posters():
+
+    file = request.files.get("file")
+    if not file:
+        return "No file uploaded", 400
+
+    try:
+        # 読み込んだ Excel ファイルを DataFrame に変換
+        df = pd.read_excel(file)
+        for _, row in df.iterrows():
+            number = row.get("Number")
+            title = row.get("Title")
+            presenter = row.get("Presenter")
+            coauthors = [x.strip() for x in row.get("Coauthors", "").split(",")]
+            affiliations = [x.strip() for x in row.get("Affiliations", "").split(",")]
+            abstract = row.get("Abstract", "")
+            max_judges = int(row.get("Max Judges", 0))
+
+            if number and title and presenter:  # 必須項目をチェック
+                new_id = max(p["id"] for p in posters) + 1 if posters else 1
+                posters.append({
+                    "id": new_id,
+                    "number": number,
+                    "title": title,
+                    "presenter": presenter,
+                    "coauthors": coauthors,
+                    "affiliations": affiliations,
+                    "abstract": abstract,
+                    "max_judges": max_judges,
+                    "current_judges": 0,
+                })
+        save_posters(posters)
+        return redirect(url_for("admin_dashboard"))
+    except Exception as e:
+        return f"Error processing file: {e}", 400
+
+@app.route("/export/judges", methods=["GET"])
+def export_judges():
+    # Prepare judges data
+    judges_df = pd.DataFrame([
+        {"Name": data["name"], 
+         "Email": data.get("email", ""),
+         "Selected Posters": data["selected_posters"],
+        }
+        for token, data in judges.items()
+    ])
+
+    # Export to Excel
+    judges_file = BytesIO()
+    with pd.ExcelWriter(judges_file, engine='openpyxl') as writer:
+        judges_df.to_excel(writer, index=False, sheet_name="Judges")
+    judges_file.seek(0)
+
+    # Send file as attachment
+    return send_file(
+        judges_file,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="judges_list.xlsx"
+    )
+
+@app.route("/export/posters", methods=["GET"])
+def export_posters():
+    # Prepare posters data
+    posters_df = pd.DataFrame([
+        {
+            "Number": poster["number"],
+            "Title": poster["title"],
+            "Presenter": poster["presenter"],
+            "Coauthors": ", ".join(poster["coauthors"]),
+            "Affiliations": ", ".join(poster["affiliations"]),
+            "Abstract": poster["abstract"],
+            "Max Judges": poster["max_judges"],
+        }
+        for poster in posters
+    ])
+
+    # Export to Excel
+    posters_file = BytesIO()
+    with pd.ExcelWriter(posters_file, engine='openpyxl') as writer:
+        posters_df.to_excel(writer, index=False, sheet_name="Posters")
+    posters_file.seek(0)
+
+    # Send file as attachment
+    return send_file(
+        posters_file,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="posters_list.xlsx"
+    )
+
+@app.route("/export/ratings", methods=["GET"])
+def export_ratings():
+    # 各ポスターのデータを収集
+    ratings_data = []
+    all_judges = {judges[token]["name"]: token for token in judges}  # すべての審査員名を取得
+
+    for poster in posters:
+        # ポスターごとの基本情報
+        poster_data = {
+            "Poster Number": poster["number"],
+            "Title": poster["title"],
+            "Presenter": poster["presenter"],
+        }
+
+        # 審査員ごとのスコアを追加
+        for judge_name, token in all_judges.items():
+            score = judges[token]["scores"].get(str(poster["id"]), "")  # スコアを取得
+            poster_data[judge_name] = score
+
+        ratings_data.append(poster_data)
+
+    # DataFrame に変換
+    df = pd.DataFrame(ratings_data)
+
+    # エクセル出力
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Ratings")
+
+    output.seek(0)
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="rating.xlsx"
+    )
+
 @app.route("/admin_logout")
 def admin_logout():
     session.pop("admin", None)
@@ -288,72 +488,91 @@ def judge_page(token):
     end_idx = min(start_idx + per_page, len(posters))  # 範囲を安全に制限
 
     # ページごとのポスターを取得
-    available_posters = posters[start_idx:end_idx]
+    available_posters = [
+        p for p in posters[start_idx:end_idx] if p["id"] not in judge_data["selected_posters"]
+    ]
 
     # 選択済みポスター
     selected_posters = [
         p for p in posters if p["id"] in judge_data["selected_posters"]
     ]
 
-    message = None
-
     if request.method == "POST":
         action = request.form.get("action")
         try:
             poster_id = int(request.form.get("poster_id", 0))
         except ValueError:
-            message = "Invalid poster ID."
-            return render_template("judge.html", judge=judge_data, selected_posters=selected_posters_data, posters=available_posters, message=message)
+            return render_template(
+                "judge.html",
+                judge=judge_data,
+                selected_posters=selected_posters,
+                available_posters=available_posters,
+                current_page=page,
+                total_pages=total_pages,
+            )
 
         poster = next((p for p in posters if p["id"] == poster_id), None)
 
         if action == "select":
-            if poster_id in judge_data["selected_posters"]:
-                message = "You have already selected this poster."
+            if str(poster_id) in judge_data["selected_posters"]:
+                return jsonify({"message": "You have already selected this poster."}), 400
             elif len(judge_data["selected_posters"]) >= app.config.get("MAX_POSTERS_PER_JUDGE", 5):
-                message = "You have reached your selection limit."
+                return jsonify({"message": "You have reached your selection limit."}), 400
             elif poster and poster["current_judges"] < poster["max_judges"]:
                 with lock:
                     poster["current_judges"] += 1
-                    judge_data["selected_posters"].append(poster_id)
-                    save_posters(posters)
-                    save_judges(judges)
-                message = "Poster selected successfully!"
+                    judge_data["selected_posters"].append(str(poster_id))
+                save_posters(posters)
+                save_judges(judges)
+                update_current_judges()
+                return jsonify({"message": f"Poster selected successfully!"}), 200
             else:
-                message = "This poster has reached its selection limit."
+                return jsonify({"message": "This poster has reached its selection limit."}), 400
 
         elif action == "deselect":
             if poster_id in judge_data["selected_posters"]:
-                with lock:
-                    judge_data["selected_posters"].remove(poster_id)
-                    if poster:
-                        poster["current_judges"] -= 1
-                        save_posters(posters)
-                        save_judges(judges)
-                message = "Poster deselected successfully!"
-            else:
-                message = "You have not selected this poster."
+                judge_data["selected_posters"].remove(poster_id)
 
-        # 更新された選択済みポスターと利用可能ポスターを再計算
-        selected_posters_data = [
+                score_key = str(poster_id)
+                if score_key in judge_data["scores"]:
+                    del judge_data["scores"][score_key]
+
+                poster = next((p for p in posters if p["id"] == str(poster_id)), None)
+                if poster:
+                    poster["current_judges"] -= 1
+
+                save_posters(posters)
+                save_judges(judges)
+                update_current_judges()
+                return jsonify({"message": f"Poster deselected successfully!"}), 200
+            else:
+                return jsonify({"message": "You have not selected this poster."}), 400
+        elif action == "rate":
+            try:
+                score = int(request.form.get("score", 0))
+                if 1 <= score <= 10:
+                    judge_data["scores"][str(poster_id)] = score
+                    save_judges(judges)
+                    return jsonify({"message": f"Rating for Poster {poster_id} submitted successfully!"}), 200
+                else:
+                    return jsonify({"message": "Invalid score. Please enter a value between 1 and 10."}), 400
+            except ValueError:
+                return jsonify({"message": "Invalid input. Please enter a valid score."}), 400
+
+        selected_posters = [
             p for p in posters if p["id"] in judge_data["selected_posters"]
         ]
         available_posters = [
-            p for p in posters if p["current_judges"] < p["max_judges"] and p["id"] not in judge_data["selected_posters"]
+            p for p in posters[start_idx:end_idx] if p["id"] not in judge_data["selected_posters"]
         ]
-    
-    # デバッグ用ログ
-    print(f"Page: {page}, Start Index: {start_idx}, End Index: {end_idx}")
-    print(f"Available Posters: {[p['id'] for p in available_posters]}")
 
     return render_template(
         "judge.html",
         judge=judge_data,
         selected_posters=selected_posters,
-        available_posters=available_posters,  # 修正点: ページごとのポスターリストを渡す
+        available_posters=available_posters,
         current_page=page,
         total_pages=total_pages,
-        message=message
     )
 
 

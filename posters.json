@@ -4,33 +4,30 @@
         "number": "P-01",
         "presenter": "Presenter 1",
         "coauthors": [
-            "Coauthor 1",
-            " Coauthor 2"
+            "Coauthor A",
+            "  Coauthor B"
         ],
         "affiliations": [
-            "Affiliation 1"
+            "Institute of Advanced Studies"
         ],
-        "title": "Poster Title 1",
-        "abstract": "This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.This is the abstract for poster 1.",
-        "max_judges": 5,
-        "current_judges": 3
+        "title": "Mechanistic Insights into RNA Modification Pathways",
+        "abstract": "RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.",
+        "max_judges": 7,
+        "current_judges": 2
     },
     {
         "id": 2,
         "number": "P-02",
         "presenter": "Presenter 2",
         "coauthors": [
-            "Coauthor 1",
-            "Coauthor 2",
-            "Coauthor 3",
-            "Coauthor 4"
+            "Coauthor C"
         ],
         "affiliations": [
-            "Affiliation 1"
+            "University of Molecular Biology"
         ],
-        "title": "Poster Title 2",
-        "abstract": "This is the abstract for poster 2.",
-        "max_judges": 3,
+        "title": "Exploring the Role of Small RNAs in Cancer Metastasis",
+        "abstract": "Small RNAs (sRNAs) have emerged as key regulators of metastasis. This study identifies specific sRNAs that interact with oncogenic pathways, revealing potential biomarkers for early detection and therapeutic targets for intervention.",
+        "max_judges": 4,
         "current_judges": 1
     },
     {
@@ -38,16 +35,15 @@
         "number": "P-03",
         "presenter": "Presenter 3",
         "coauthors": [
-            "Coauthor 1",
-            "Coauthor 2"
+            "Coauthor D",
+            " Coauthor E"
         ],
         "affiliations": [
-            "Affiliation 1",
-            "Affiliation 2"
+            "Global Health Research Institute"
         ],
-        "title": "Poster Title 3",
-        "abstract": "This is the abstract for poster 3.",
-        "max_judges": 5,
+        "title": "Novel Approaches to Enhance CRISPR-Cas9 Efficiency",
+        "abstract": "This research presents innovative methodologies to enhance the precision and efficiency of CRISPR-Cas9 genome editing. By modulating repair pathways and optimizing gRNA design, we achieved higher target specificity, paving the way for clinical applications.",
+        "max_judges": 3,
         "current_judges": 3
     },
     {
@@ -55,70 +51,61 @@
         "number": "P-04",
         "presenter": "Presenter 4",
         "coauthors": [
-            "Coauthor 1",
-            "Coauthor 2",
-            "Coauthor 3"
+            "Coauthor F"
         ],
         "affiliations": [
-            "Affiliation 1",
-            "Affiliation 2"
+            "Biomedical Research Center"
         ],
-        "title": "Poster Title 4",
-        "abstract": "This is the abstract for poster 4.",
-        "max_judges": 2,
-        "current_judges": 2
+        "title": "Metabolic Adaptations in Hypoxic Tumor Microenvironments",
+        "abstract": "Hypoxia alters metabolic pathways within tumor cells, driving growth and resistance. This study deciphers the shifts in glucose metabolism and lipid biosynthesis in hypoxic conditions, highlighting potential targets for cancer therapy.",
+        "max_judges": 5,
+        "current_judges": 1
     },
     {
         "id": 5,
         "number": "P-05",
         "presenter": "Presenter 5",
         "coauthors": [
-            "Coauthor 1",
-            "Coauthor 2",
-            "Coauthor 3"
+            "Coauthor G",
+            "Coauthor H"
         ],
         "affiliations": [
-            "Affiliation 1",
-            "Affiliation 2"
+            "Genomic Medicine Lab"
         ],
-        "title": "Poster Title 5",
-        "abstract": "This is the abstract for poster 5.",
-        "max_judges": 5,
-        "current_judges": 4
+        "title": "Deciphering Epigenetic Landscapes in Neural Development",
+        "abstract": "Epigenetic modifications are pivotal in neural differentiation. Our integrative analysis combines ChIP-seq and ATAC-seq to unravel the dynamic interplay between histone modifications and transcription factor binding during neurogenesis.",
+        "max_judges": 4,
+        "current_judges": 3
     },
     {
         "id": 6,
         "number": "P-06",
         "presenter": "Presenter 6",
         "coauthors": [
-            "Coauthor 1",
-            "Coauthor 2"
+            "Coauthor I"
         ],
         "affiliations": [
-            "Affiliation 1",
-            "Affiliation 2",
-            "Affiliation 3"
+            "Center for Cellular Research"
         ],
-        "title": "Poster Title 6",
-        "abstract": "This is the abstract for poster 6.",
-        "max_judges": 4,
-        "current_judges": 4
+        "title": "Unveiling the Mechanisms of Mitochondrial Fusion",
+        "abstract": "Mitochondrial fusion is essential for maintaining cellular homeostasis. This study investigates the molecular regulators of mitochondrial dynamics, revealing insights into their roles in neurodegenerative diseases.",
+        "max_judges": 6,
+        "current_judges": 3
     },
     {
         "id": 7,
         "number": "P-07",
         "presenter": "Presenter 7",
         "coauthors": [
-            "Coauthor 1",
-            "Coauthor 2",
-            "Coauthor 3"
+            "Coauthor J",
+            "Coauthor K"
         ],
         "affiliations": [
-            "Affiliation 1"
+            "Systems Biology Institute"
         ],
-        "title": "Poster Title 7",
-        "abstract": "This is the abstract for poster 7.",
-        "max_judges": 2,
+        "title": "Machine Learning in Drug Discovery: A Case Study",
+        "abstract": "By integrating machine learning algorithms with chemoinformatics, this study predicts novel drug candidates for Alzheimer\u2019s disease, providing a computational framework for future therapeutic developments.",
+        "max_judges": 3,
         "current_judges": 2
     },
     {
@@ -126,15 +113,14 @@
         "number": "P-08",
         "presenter": "Presenter 8",
         "coauthors": [
-            "Coauthor 1",
-            "Coauthor 2"
+            "Coauthor L"
         ],
         "affiliations": [
-            "Affiliation 1"
+            "Institute of Biotechnology"
         ],
-        "title": "Poster Title 8",
-        "abstract": "This is the abstract for poster 8.",
-        "max_judges": 5,
+        "title": "Characterizing Extracellular Vesicles in Immune Regulation",
+        "abstract": "Extracellular vesicles (EVs) mediate intercellular communication. This study characterizes EVs released under inflammatory conditions, highlighting their role in modulating immune responses and their potential as diagnostic biomarkers.",
+        "max_judges": 4,
         "current_judges": 2
     },
     {
@@ -343,6 +329,354 @@
     },
     {
         "id": 20,
+        "number": "P-20",
+        "presenter": "Presenter 20",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 20",
+        "abstract": "This is the abstract for poster 20.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 21,
+        "number": "P-01",
+        "presenter": "Presenter 1",
+        "coauthors": [
+            "Coauthor A",
+            "Coauthor B"
+        ],
+        "affiliations": [
+            "Institute of Advanced Studies"
+        ],
+        "title": "Mechanistic Insights into RNA Modification Pathways",
+        "abstract": "RNA modifications play a critical role in gene expression regulation. This study explores the enzymatic mechanisms underlying N6-methyladenosine (m6A) modifications and their impact on translation efficiency. Using high-throughput sequencing and structural analysis, we provide evidence linking m6A modifications to stress response pathways.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 22,
+        "number": "P-02",
+        "presenter": "Presenter 2",
+        "coauthors": [
+            "Coauthor C"
+        ],
+        "affiliations": [
+            "University of Molecular Biology"
+        ],
+        "title": "Exploring the Role of Small RNAs in Cancer Metastasis",
+        "abstract": "Small RNAs (sRNAs) have emerged as key regulators of metastasis. This study identifies specific sRNAs that interact with oncogenic pathways, revealing potential biomarkers for early detection and therapeutic targets for intervention.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 23,
+        "number": "P-03",
+        "presenter": "Presenter 3",
+        "coauthors": [
+            "Coauthor D",
+            "Coauthor E"
+        ],
+        "affiliations": [
+            "Global Health Research Institute"
+        ],
+        "title": "Novel Approaches to Enhance CRISPR-Cas9 Efficiency",
+        "abstract": "This research presents innovative methodologies to enhance the precision and efficiency of CRISPR-Cas9 genome editing. By modulating repair pathways and optimizing gRNA design, we achieved higher target specificity, paving the way for clinical applications.",
+        "max_judges": 6,
+        "current_judges": 0
+    },
+    {
+        "id": 24,
+        "number": "P-04",
+        "presenter": "Presenter 4",
+        "coauthors": [
+            "Coauthor F"
+        ],
+        "affiliations": [
+            "Biomedical Research Center"
+        ],
+        "title": "Metabolic Adaptations in Hypoxic Tumor Microenvironments",
+        "abstract": "Hypoxia alters metabolic pathways within tumor cells, driving growth and resistance. This study deciphers the shifts in glucose metabolism and lipid biosynthesis in hypoxic conditions, highlighting potential targets for cancer therapy.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 25,
+        "number": "P-05",
+        "presenter": "Presenter 5",
+        "coauthors": [
+            "Coauthor G",
+            "Coauthor H"
+        ],
+        "affiliations": [
+            "Genomic Medicine Lab"
+        ],
+        "title": "Deciphering Epigenetic Landscapes in Neural Development",
+        "abstract": "Epigenetic modifications are pivotal in neural differentiation. Our integrative analysis combines ChIP-seq and ATAC-seq to unravel the dynamic interplay between histone modifications and transcription factor binding during neurogenesis.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 26,
+        "number": "P-06",
+        "presenter": "Presenter 6",
+        "coauthors": [
+            "Coauthor I"
+        ],
+        "affiliations": [
+            "Center for Cellular Research"
+        ],
+        "title": "Unveiling the Mechanisms of Mitochondrial Fusion",
+        "abstract": "Mitochondrial fusion is essential for maintaining cellular homeostasis. This study investigates the molecular regulators of mitochondrial dynamics, revealing insights into their roles in neurodegenerative diseases.",
+        "max_judges": 6,
+        "current_judges": 0
+    },
+    {
+        "id": 27,
+        "number": "P-07",
+        "presenter": "Presenter 7",
+        "coauthors": [
+            "Coauthor J",
+            "Coauthor K"
+        ],
+        "affiliations": [
+            "Systems Biology Institute"
+        ],
+        "title": "Machine Learning in Drug Discovery: A Case Study",
+        "abstract": "By integrating machine learning algorithms with chemoinformatics, this study predicts novel drug candidates for Alzheimer\u2019s disease, providing a computational framework for future therapeutic developments.",
+        "max_judges": 3,
+        "current_judges": 0
+    },
+    {
+        "id": 28,
+        "number": "P-08",
+        "presenter": "Presenter 8",
+        "coauthors": [
+            "Coauthor L"
+        ],
+        "affiliations": [
+            "Institute of Biotechnology"
+        ],
+        "title": "Characterizing Extracellular Vesicles in Immune Regulation",
+        "abstract": "Extracellular vesicles (EVs) mediate intercellular communication. This study characterizes EVs released under inflammatory conditions, highlighting their role in modulating immune responses and their potential as diagnostic biomarkers.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 29,
+        "number": "P-09",
+        "presenter": "Presenter 9",
+        "coauthors": [
+            "Coauthor 1"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            " Affiliation 2",
+            " Affiliation 3"
+        ],
+        "title": "Poster Title 9",
+        "abstract": "This is the abstract for poster 9.",
+        "max_judges": 6,
+        "current_judges": 0
+    },
+    {
+        "id": 30,
+        "number": "P-10",
+        "presenter": "Presenter 10",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 10",
+        "abstract": "This is the abstract for poster 10.",
+        "max_judges": 2,
+        "current_judges": 0
+    },
+    {
+        "id": 31,
+        "number": "P-11",
+        "presenter": "Presenter 11",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 11",
+        "abstract": "This is the abstract for poster 11.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 32,
+        "number": "P-12",
+        "presenter": "Presenter 12",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 12",
+        "abstract": "This is the abstract for poster 12.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 33,
+        "number": "P-13",
+        "presenter": "Presenter 13",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 13",
+        "abstract": "This is the abstract for poster 13.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 34,
+        "number": "P-14",
+        "presenter": "Presenter 14",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 14",
+        "abstract": "This is the abstract for poster 14.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 35,
+        "number": "P-15",
+        "presenter": "Presenter 15",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 15",
+        "abstract": "This is the abstract for poster 15.",
+        "max_judges": 4,
+        "current_judges": 0
+    },
+    {
+        "id": 36,
+        "number": "P-16",
+        "presenter": "Presenter 16",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 16",
+        "abstract": "This is the abstract for poster 16.",
+        "max_judges": 3,
+        "current_judges": 0
+    },
+    {
+        "id": 37,
+        "number": "P-17",
+        "presenter": "Presenter 17",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2"
+        ],
+        "title": "Poster Title 17",
+        "abstract": "This is the abstract for poster 17.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 38,
+        "number": "P-18",
+        "presenter": "Presenter 18",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2"
+        ],
+        "affiliations": [
+            "Affiliation 1",
+            "Affiliation 2",
+            "Affiliation 3"
+        ],
+        "title": "Poster Title 18",
+        "abstract": "This is the abstract for poster 18.",
+        "max_judges": 5,
+        "current_judges": 0
+    },
+    {
+        "id": 39,
+        "number": "P-19",
+        "presenter": "Presenter 19",
+        "coauthors": [
+            "Coauthor 1",
+            "Coauthor 2",
+            "Coauthor 3",
+            "Coauthor 4"
+        ],
+        "affiliations": [
+            "Affiliation 1"
+        ],
+        "title": "Poster Title 19",
+        "abstract": "This is the abstract for poster 19.",
+        "max_judges": 2,
+        "current_judges": 0
+    },
+    {
+        "id": 40,
         "number": "P-20",
         "presenter": "Presenter 20",
         "coauthors": [

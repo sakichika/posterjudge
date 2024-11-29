@@ -11,22 +11,22 @@
 		<!-- CSS for Modals and Cards -->
 		<style>
 			.modal {
-				position: relative; /* ボタンの位置をモーダル内に固定するためにrelativeを指定 */
-				width: 90%; /* デフォルトで画面幅の90%を使用 */
-				max-width: 600px; /* モーダルの最大幅を指定 */
+				position: relative;
+				width: 90%;
+				max-width: 600px;
 				margin: auto;
 				padding: 20px;
 				background-color: white;
 				border-radius: 8px;
 				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-				overflow-y: auto; /* 内容が長い場合でもスクロール可能にする */
-				max-height: 90vh; /* モーダルの高さを画面の90%以下に制限 */
+				overflow-y: auto; 
+				max-height: 90vh; 
 			}
 
 			.modal .modal-close {
-				position: absolute; /* モーダルの中での絶対配置 */
-				bottom: 10px; /* 下端から10px */
-				right: 10px; /* 右端から10px */
+				position: absolute;
+				bottom: 10px;
+				right: 10px; 
 				background-color: #ccc;
 				color: black;
 				border: none;
@@ -38,130 +38,79 @@
 			}
 
 			.modal .modal-close:hover {
-				background-color: #aaa; /* ホバー時の色変更 */
+				background-color: #aaa;
 			}
 
-			/* 入力フィールドのレスポンシブデザイン */
 			.modal input[type="text"],
 			.modal textarea,
 			.modal input[type="number"] {
-				width: 100%; /* フル幅 */
-				box-sizing: border-box; /* パディングを含めたサイズ調整 */
+				width: 100%;
+				box-sizing: border-box; 
 				margin-bottom: 10px;
 			}
 
-			/* モバイルデバイス向けのスタイル */
 			@media (max-width: 768px) {
 				.modal {
-					width: 90%; /* モバイルではモーダルの幅を拡大 */
+					width: 90%;
 				}
 			}
 
-			/* カードボックスのスタイル */
 			.poster-box {
-				width: calc(50% - 10px); /* 2列レイアウト */
-				background-color: #f9f9f9;
-				border: 1px solid #ddd;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				align-items: flex-start;
+				padding: 10px;
+				border: 1px solid #ccc;
 				border-radius: 8px;
-				padding: 15px;
-				cursor: pointer;
-				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				background-color: #f9f9f9;
+				box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+				width: calc(100%-10px);
+				min-height: 100px;
+				word-wrap: break-word;
+				overflow: hidden;
 				transition: transform 0.2s, box-shadow 0.2s;
-				text-align: center;
-				margin-bottom: 10px;
 			}
 
 			.poster-box:hover {
-				transform: scale(1.02);
-				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+				transform: scale(0.95);
+				box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
 			}
 
-			/* レスポンシブ対応 */
-			@media (max-width: 768px) {
-				.poster-box {
-					width: 100%; /* モバイルでは1列表示 */
-				}
+			.poster-box p {
+				margin: 0;
+				padding: 5px 0;
 			}
-		</style>
-	</head>
-	<body>
-		<h1>Welcome, {{ judge.name }}</h1>
 
-		{% if message %}
-		<p style="color: green;">{{ message }}</p>
-		{% endif %}
+			.poster-box p {
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
 
-		<!-- Selected Posters -->
-		<h2>Your Selected Posters</h2>
-		<div style="display: flex; flex-wrap: wrap; gap: 10px;">
-			{% for poster in selected_posters %}
-				<div class="poster-box" onclick="openModal('modal-{{ poster.id }}')">
-					<p><strong>{{ poster.number }}</strong></p>
-					<p>{{ poster.presenter }}</p>
-					<p>{{ poster.title }}</p>
-				</div>
+			.poster-box.multiline p {
+				white-space: normal;
+				text-overflow: clip;
+			}
 
-				<!-- Deselect モーダル -->
-				<div id="modal-{{ poster.id }}" class="modal">
-					<h2>{{ poster.title }}</h2>
-					<p><strong>Presenter:</strong> {{ poster.presenter }}</p>
-					<p><strong>Abstract:</strong> {{ poster.abstract }}</p>
-					<form method="POST">
-						<input type="hidden" name="action" value="deselect">
-						<input type="hidden" name="poster_id" value="{{ poster.id }}">
-						<button type="submit" style="background-color: #f44336; color: white; border: none; padding: 10px; cursor: pointer;">Deselect Poster</button>
-					</form>
-					<button class="modal-close">Close</button>
-				</div>
-			{% else %}
-				<p>No posters selected.</p>
-			{% endfor %}
-		</div>
-
-		<!-- Available Posters -->
-		<h2>Available Posters</h2>
-		<div style="display: flex; flex-wrap: wrap; gap: 10px;">
-			{% for poster in available_posters %}
-				{% if poster.id not in judge.selected_posters and poster.current_judges < poster.max_judges %}
-					<div class="poster-box" onclick="openModal('modal-available-{{ poster.id }}')">
-						<p><strong>{{ poster.number }}</strong></p>
-						<p>{{ poster.presenter }}</p>
-						<p>{{ poster.title }}</p>
-					</div>
-
-					<!-- Select モーダル -->
-					<div id="modal-available-{{ poster.id }}" class="modal">
-						<h2>{{ poster.title }}</h2>
-						<p><strong>Presenter:</strong> {{ poster.presenter }}</p>
-						<p><strong>Abstract:</strong> {{ poster.abstract }}</p>
-						<form method="POST">
-							<input type="hidden" name="action" value="select">
-							<input type="hidden" name="poster_id" value="{{ poster.id }}">
-							<button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer;">Select Poster</button>
-						</form>
-						<button class="modal-close">Close</button>
-					</div>
-				{% endif %}
-			{% endfor %}
-		</div>
-
-		<!-- ページネーション -->
-		<div class="pagination">
-			{% if current_page > 1 %}
-				<a href="?page={{ current_page - 1 }}" class="prev">Previous</a>
-			{% endif %}
-			{% for p in range(1, total_pages + 1) %}
-				<a href="?page={{ p }}" class="{% if p == current_page %}active{% endif %}">{{ p }}</a>
-			{% endfor %}
-			{% if current_page < total_pages %}
-				<a href="?page={{ current_page + 1 }}" class="next">Next</a>
-			{% endif %}
-		</div>
-
-		<style>
-		.pagination {
+			.pagination {
 			margin-top: 20px;
 			text-align: center;
+		}
+
+		.abstract-container {
+			margin-bottom: 20px;
+		}
+
+		.abstract-scroll {
+			max-height: 200px; /* 表示領域の最大高さ */
+			overflow-y: auto; /* 縦方向のスクロールを有効に */
+			padding: 10px;
+			border: 1px solid #ccc; /* 境界線を設定 */
+			background-color: #f9f9f9; /* 背景色 */
+			border-radius: 5px;
+			font-size: 14px;
+			line-height: 1.5;
 		}
 
 		.pagination a {
@@ -182,11 +131,210 @@
 		.pagination a:hover {
 			background-color: #ddd;
 		}
+
+		.pagination-link {
+			display: inline-block;
+			padding: 8px 16px;
+			margin: 0 5px;
+			text-decoration: none;
+			color: #007bff;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			transition: background-color 0.3s, color 0.3s;
+		}
+
+		.pagination-link:hover {
+			background-color: #f1f1f1;
+			color: #0056b3;
+		}
+
+		.pagination-link.active {
+			background-color: #007bff;
+			color: #fff;
+			border-color: #007bff;
+			pointer-events: none; 
+		}
+
+		.scroll-to-top {
+			position: fixed;
+			bottom: 70px;
+			right: 20px;
+			width: 50px;
+			height: 50px;
+			background-color: #007bff;
+			color: white;
+			font-size: 24px;
+			text-align: center;
+			line-height: 50px;
+			border-radius: 50%;
+			cursor: pointer;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+			transition: opacity 0.3s, transform 0.3s;
+		}
+
+		.scroll-to-top:hover {
+			background-color: #0056b3;
+			transform: scale(1.1);
+		}
+
+		.scroll-to-btm {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			width: 50px;
+			height: 50px;
+			background-color: #007bff;
+			color: white;
+			font-size: 24px;
+			text-align: center;
+			line-height: 50px;
+			border-radius: 50%;
+			cursor: pointer;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+			transition: opacity 0.3s, transform 0.3s;
+		}
+
+		.scroll-to-btm:hover {
+			background-color: #0056b3;
+			transform: scale(1.1);
+		}
+
+		.button01 {
+			background-color: #2f4f4f;
+			color: #fff;
+			padding: 10px 30px;
+			text-decoration: none;
+			font-size: 1em;
+			}
+			.button01:hover {
+			color: #fff;
+			opacity: 0.8;
+			}
+
+			@media (max-width: 768px) {
+				.poster-box {
+					width: 90%;
+				}
+			}
 		</style>
+	</head>
+
+	<body>
+		<h1>Welcome, {{ judge.name }}</h1>
+
+		<!-- メッセージ表示エリア -->
+		<p id="message" style="font-weight: bold; margin-bottom: 20px; display: none;"></p>
+
+		<!-- Selected Posters -->
+		<h2>Your Selected Posters</h2>
+		{% for poster in selected_posters %}
+			<div class="poster-box" onclick="openModal('modal-{{ poster.id }}')">
+				<p><strong>{{ poster.number }}</strong></p>
+				<p>{{ poster.presenter }}</p>
+				<p>{{ poster.title }}</p>
+			</div>
+
+			<!-- Deselect modal -->
+			<div id="modal-{{ poster.id }}" class="modal">
+				<h2>{{ poster.title }}</h2>
+				<p><strong>Presenter:</strong> {{ poster.presenter }}</p>
+				<div class="abstract-container">
+					<p><strong>Abstract:</strong></p>
+					<div class="abstract-scroll">
+						{{ poster.abstract }}
+					</div>
+				</div>
+				<form method="POST">
+					<input type="hidden" name="action" value="rate">
+					<input type="hidden" name="poster_id" value="{{ poster.id }}">
+					
+					<label for="score-{{ poster.id }}">Score:</label>
+					<input type="number" id="score-{{ poster.id }}" name="score" min="1" max="10" 
+						value="{{ judge.scores.get(poster.id|string, '') }}" required>
+					<button type="submit" style="margin-top: 10px;">Submit Rating</button>
+				</form>
+				<br>
+				<form method="POST" class="poster-select-form">
+					<input type="hidden" name="action" value="deselect">
+					<input type="hidden" name="poster_id" value="{{ poster.id }}">
+					<button type="submit" style="background-color: #f44336; color: white; border: none; padding: 10px; cursor: pointer;">Deselect Poster</button>
+				</form>
+				<button class="modal-close">Close</button>
+			</div>
+		{% else %}
+			<p>No posters selected.</p>
+		{% endfor %}
+
+		<!-- Available Posters -->
+		<div id="available-posters">
+			<h2>Available Posters</h2>
+			{% for poster in available_posters %}
+				{% if poster.id not in judge.selected_posters and poster.current_judges < poster.max_judges %}
+					<div class="poster-box" onclick="openModal('modal-available-{{ poster.id }}')">
+						<p><strong>{{ poster.number }}</strong></p>
+						<p>{{ poster.presenter }}</p>
+						<p>{{ poster.title }}</p>
+					</div>
+
+					<!-- Select modal -->
+					<div id="modal-available-{{ poster.id }}" class="modal">
+						<h2>{{ poster.title }}</h2>
+						<p><strong>Presenter:</strong> {{ poster.presenter }}</p>
+						<div class="abstract-container">
+							<p><strong>Abstract:</strong></p>
+							<div class="abstract-scroll">
+								{{ poster.abstract }}
+							</div>
+						</div>
+						<form method="POST" class="poster-select-form">
+							<input type="hidden" name="action" value="select">
+							<input type="hidden" name="poster_id" value="{{ poster.id }}">
+							<button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer;">Select Poster</button>
+						</form>
+						<button class="modal-close">Close</button>
+					</div>
+				{% endif %}
+			{% endfor %}
+		</div>
+
+		<div class="pagination">
+			{% if current_page > 1 %}
+				<a href="?page={{ current_page - 1 }}" 
+				   class="pagination-link prev" 
+				   data-page="{{ current_page - 1 }}">
+				   Previous
+				</a>
+			{% endif %}
+
+			{% for p in range(1, total_pages + 1) %}
+				<a href="?page={{ p }}" 
+				   class="pagination-link {% if p == current_page %}active{% endif %}" 
+				   data-page="{{ p }}">
+				   {{ p }}
+				</a>
+			{% endfor %}
+		
+			{% if current_page < total_pages %}
+				<a href="?page={{ current_page + 1 }}" 
+				   class="pagination-link next" 
+				   data-page="{{ current_page + 1 }}">
+				   Next
+				</a>
+			{% endif %}
+		</div>
+		
+		<div id="scroll-to-top" class="scroll-to-top">
+			↑
+		</div>
+
+		<div id="scroll-to-btm" class="scroll-to-btm">
+			↓
+		</div>
+		
 		<!-- Logout -->
-		<form method="GET" action="/judge_logout">
-			<button type="submit">Logout</button>
-		</form>
+		<a href="/judge_logout" class="button01">Logout</a>
 
 		<!-- JavaScript -->
 		<script>
@@ -198,6 +346,123 @@
 			// モーダルを閉じる
 			$(document).on('click', '.modal-close', function () {
 				$.modal.close(); // モーダルを閉じる
+			});
+
+			document.addEventListener("DOMContentLoaded", function () {
+				const messageBox = document.getElementById("message");
+
+				// ページロード時にセッションストレージからメッセージを取得して表示
+				const savedMessage = sessionStorage.getItem("message");
+				const savedMessageColor = sessionStorage.getItem("messageColor");
+
+				if (savedMessage) {
+					messageBox.textContent = savedMessage;
+					messageBox.style.color = savedMessageColor || "green";
+					messageBox.style.display = "block";
+
+					// 一定時間後にメッセージを非表示（必要に応じて削除）
+					setTimeout(() => {
+						messageBox.style.display = "none";
+						sessionStorage.removeItem("message");
+						sessionStorage.removeItem("messageColor");
+					}, 5000);
+				}
+
+				// フォーム送信時にセッションストレージにメッセージを保存
+				document.querySelectorAll("form").forEach(form => {
+					form.addEventListener("submit", function (e) {
+						const action = form.querySelector("input[name='action']").value;
+
+						// メッセージの内容を設定
+						let message = "";
+						let messageColor = "green"; // デフォルトの色
+
+						if (action === "rate") {
+							message = "Rating submitted successfully!";
+						} else if (action === "select") {
+							message = "Poster selected successfully!";
+						} else if (action === "deselect") {
+							message = "Poster deselected successfully!";
+							messageColor = "red"; // Deselect時の色
+						} else {
+							message = "Operation completed successfully!";
+						}
+
+						// セッションストレージに保存
+						sessionStorage.setItem("message", message);
+						sessionStorage.setItem("messageColor", messageColor);
+
+						// フォーム送信後にページをリロードして変更を反映
+						setTimeout(() => {
+							location.reload();
+						}, 100); // 短いディレイを追加
+					});
+				});
+			});
+
+			function displayMessage(text, type = "success") {
+				const messageElement = $("#message");
+				messageElement
+					.text(text)
+					.css("color", type === "success" ? "green" : "red")
+					.fadeIn();
+			}
+
+			// 共通フォーム送信ハンドラ
+			$(document).on("submit", "form", function (e) {
+				e.preventDefault(); // デフォルトのフォーム送信を無効化
+				const form = $(this);
+
+				$.post(form.attr("action") || window.location.href, form.serialize())
+					.done(function (response) {
+						if (response.message) {
+							displayMessage(response.message, "success");
+						}
+					})
+					.fail(function (xhr) {
+						const errorResponse = xhr.responseJSON || { message: "Operation failed. Please try again." };
+						displayMessage(errorResponse.message, "error");
+					});
+			});
+
+			$.post(form.attr("action") || window.location.href, form.serialize(), function (response) {
+					$.modal.close();
+					location.reload(); // 操作後にページをリロード
+				}).fail(function () {
+					alert("Operation failed. Please try again.");
+				});
+
+			// ページ読み込み時のスクロール復元
+			window.addEventListener("load", function () {
+				const hash = location.hash;
+				if (hash) {
+					const element = document.querySelector(hash);
+					if (element) {
+						element.scrollIntoView({ behavior: "smooth", block: "start" });
+					}
+				}
+			});
+
+			// ページネーションリンクの動作
+			document.querySelectorAll(".pagination-link").forEach(link => {
+				link.addEventListener("click", function () {
+					const targetId = "available-posters"; // ターゲットのIDを指定
+					location.hash = targetId; // ページ遷移後にスクロール
+				});
+			});
+
+			// スクロールボタンの動作
+			document.addEventListener("DOMContentLoaded", function () {
+				const scrollToTopButton = document.getElementById("scroll-to-top");
+				const scrollToBtmButton = document.getElementById("scroll-to-btm");
+
+				scrollToTopButton.addEventListener("click", function () {
+					window.scrollTo({ top: 0, behavior: "smooth" });
+				});
+
+				scrollToBtmButton.addEventListener("click", function () {
+					window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+				});
 			});
 		</script>
 	</body>

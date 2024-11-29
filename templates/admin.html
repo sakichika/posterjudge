@@ -7,31 +7,215 @@
 		<!-- jquery-modal -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+		<!-- CSS for Modals and Cards -->
 		<style>
-			/* モーダル全体のスタイル */
 			.modal {
-				width: 80%; /* モーダルの幅を画面サイズに応じて設定 */
-				max-width: 600px; /* モーダルの最大幅を指定 */
+				position: relative;
+				width: 90%;
+				max-width: 600px;
 				margin: auto;
 				padding: 20px;
+				background-color: white;
+				border-radius: 8px;
+				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				overflow-y: auto;
+				max-height: 90vh;
 			}
-	
-			/* 入力フィールドのレスポンシブデザイン */
+
+			.modal .modal-close {
+				position: absolute;
+				bottom: 10px;
+				right: 10px; 
+				background-color: #ccc;
+				color: black;
+				border: none;
+				padding: 8px 16px;
+				cursor: pointer;
+				border-radius: 4px;
+				font-size: 14px;
+				transition: background-color 0.3s;
+			}
+
+			.modal .modal-close:hover {
+				background-color: #aaa;
+			}
+
 			.modal input[type="text"],
 			.modal textarea,
 			.modal input[type="number"] {
-				width: 100%; /* フル幅 */
-				max-width: 100%; /* 最大幅を親要素に依存 */
-				box-sizing: border-box; /* パディングを含めたサイズ調整 */
+				width: 100%;
+				box-sizing: border-box;
 				margin-bottom: 10px;
 			}
-	
-			/* モバイルデバイス向けのスタイル */
+
 			@media (max-width: 768px) {
 				.modal {
-					width: 90%; /* モバイルではモーダルの幅を拡大 */
+					width: 90%;
 				}
 			}
+			
+			.abstract-container {
+				margin-bottom: 20px;
+			}
+
+			.abstract-scroll {
+				max-height: 200px; /* 表示領域の最大高さ */
+				overflow-y: auto; /* 縦方向のスクロールを有効に */
+				padding: 10px;
+				border: 1px solid #ccc; /* 境界線を設定 */
+				background-color: #f9f9f9; /* 背景色 */
+				border-radius: 5px;
+				font-size: 14px;
+				line-height: 1.5;
+			}
+			
+			.poster-box {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				align-items: flex-start;
+				padding: 10px;
+				border: 1px solid #ccc;
+				border-radius: 8px;
+				background-color: #f9f9f9;
+				box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+				width: calc(100%-10px);
+				min-height: 100px;
+				word-wrap: break-word;
+				overflow: hidden;
+				transition: transform 0.2s, box-shadow 0.2s;
+			}
+
+			.poster-box:hover {
+				transform: scale(0.95);
+				box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
+			}
+
+			.poster-box p {
+				margin: 0;
+				padding: 5px 0;
+			}
+
+			.poster-box p {
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.poster-box.multiline p {
+				white-space: normal;
+				text-overflow: clip;
+			}
+
+			.pagination {
+			margin-top: 20px;
+			text-align: center;
+		}
+
+		.pagination a {
+			display: inline-block;
+			margin: 0 5px;
+			padding: 8px 12px;
+			background-color: #f1f1f1;
+			color: #333;
+			text-decoration: none;
+			border-radius: 4px;
+		}
+
+		.pagination a.active {
+			background-color: #007bff;
+			color: #fff;
+		}
+
+		.pagination a:hover {
+			background-color: #ddd;
+		}
+
+		.pagination-link {
+			display: inline-block;
+			padding: 8px 16px;
+			margin: 0 5px;
+			text-decoration: none;
+			color: #007bff;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			transition: background-color 0.3s, color 0.3s;
+		}
+
+		.pagination-link:hover {
+			background-color: #f1f1f1;
+			color: #0056b3;
+		}
+
+		.pagination-link.active {
+			background-color: #007bff;
+			color: #fff;
+			border-color: #007bff;
+			pointer-events: none;
+		}
+
+		.scroll-to-top {
+			position: fixed;
+			bottom: 70px;
+			right: 20px;
+			width: 50px;
+			height: 50px;
+			background-color: #007bff;
+			color: white;
+			font-size: 24px;
+			text-align: center;
+			line-height: 50px;
+			border-radius: 50%;
+			cursor: pointer;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+			transition: opacity 0.3s, transform 0.3s;
+		}
+
+		.scroll-to-top:hover {
+			background-color: #0056b3;
+			transform: scale(1.1);
+		}
+
+		.scroll-to-btm {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			width: 50px;
+			height: 50px;
+			background-color: #007bff;
+			color: white;
+			font-size: 24px;
+			text-align: center;
+			line-height: 50px;
+			border-radius: 50%;
+			cursor: pointer;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+			transition: opacity 0.3s, transform 0.3s;
+		}
+
+		.scroll-to-btm:hover {
+			background-color: #0056b3;
+			transform: scale(1.1);
+		}
+		.button01 {
+		background-color: #2f4f4f;
+		color: #fff;
+		padding: 10px 30px;
+		text-decoration: none;
+		font-size: 1em;
+		}
+		.button01:hover {
+		color: #fff;
+		opacity: 0.8;
+		}
+
+		@media (max-width: 768px) {
+			.poster-box {
+				width: 100%;
+			}
+		}
 		</style>
 	</head>
 	<body>
@@ -42,7 +226,7 @@
 			{% for token, data in judges.items() %}
 				<li>
 					<a href="#modal-judge-{{ token }}" rel="modal:open">{{ data.name }}</a> (Token: {{ token }})
-					<!-- 審査員情報編集モーダル -->
+
 					<div id="modal-judge-{{ token }}" class="modal">
 						<h2>Edit Judge: {{ data.name }}</h2>
 						<form method="POST">
@@ -104,19 +288,17 @@
 		</ul>
 
 		<script>
-			// 非同期でdeselectを実行
 			$(document).on("submit", ".deselect-form", function (e) {
 				e.preventDefault();
 				const form = $(this);
 				$.post(form.attr("action") || window.location.href, form.serialize(), function () {
 					const li = form.closest("li");
-					li.remove(); // リストから削除
+					li.remove();
 				}).fail(function () {
 					alert("Failed to deselect the poster.");
 				});
 			});
 
-			// 非同期でassignを実行
 			$(document).on("submit", ".assign-form", function (e) {
 				e.preventDefault();
 				const form = $(this);
@@ -125,7 +307,6 @@
 					const selectedPosterId = form.find("select[name='poster_id']").val();
 					const selectedPosterText = form.find("select[name='poster_id'] option:selected").text();
 
-					// 新しいポスターを選択リストに追加
 					const newPoster = `
 						<li id="poster-${selectedPosterId}">
 							${selectedPosterText}
@@ -138,7 +319,6 @@
 						</li>`;
 					$(`#selected-posters-${token}`).append(newPoster);
 
-					// ドロップダウンから選択済みポスターを削除
 					form.find(`select[name="poster_id"] option[value="${selectedPosterId}"]`).remove();
 				}).fail(function () {
 					alert("Failed to assign the poster.");
@@ -146,8 +326,10 @@
 			});
 		</script>
 
-		<!-- 新しい審査員を追加するフォーム -->
+		<h2>Add New Judges</h2>
+
 		<a href="#modal-add-judge" rel="modal:open">Add New Judge</a>
+		
 		<div id="modal-add-judge" class="modal">
 			<h2>Add New Judge</h2>
 			<form method="POST">
@@ -159,76 +341,82 @@
 			</form>
 			<button class="modal-close">Close</button>
 		</div>
+		
+		<form action="/upload/judges" method="post" enctype="multipart/form-data">
+			<input type="file" name="file" accept=".xlsx" required>
+			<button type="submit">Upload Judges</button>
+		</form>
 
+		<h2>Export Judges</h2>
+		<a href="/export/judges">Download Judges List</a><br>
 
+		<div id="available-posters">
 		<h2>Posters</h2>
 		<ul>
 			{% for poster in posters %}
-				<li>
-					<a href="#modal-poster-{{ poster.id }}" rel="modal:open">
-						{{ poster.title }}
-					</a>
-					<!-- モーダル開始 -->
-					<div id="modal-poster-{{ poster.id }}" class="modal">
-						<h2>Edit Poster</h2>
-						<form method="POST" class="edit-poster-form">
-							<input type="hidden" name="action" value="edit_poster">
-							<input type="hidden" name="poster_id" value="{{ poster.id }}">
-				
-							<label for="poster-title-{{ poster.id }}">Title:</label>
-							<textarea id="poster-title-{{ poster.id }}" name="title" rows="1" placeholder="Enter Title">{{ poster.title }}</textarea>
-				
-							<label for="poster-number-{{ poster.id }}">Number:</label>
-							<input type="text" id="poster-number-{{ poster.id }}" name="number" value="{{ poster.number }}" placeholder="Enter Poster Number">
-				
-							<label for="poster-presenter-{{ poster.id }}">Presenter:</label>
-							<input type="text" id="poster-presenter-{{ poster.id }}" name="presenter" value="{{ poster.presenter }}" placeholder="Enter Presenter Name">
-				
-							<label for="poster-coauthors-{{ poster.id }}">Coauthors:</label>
-							<textarea id="poster-coauthors-{{ poster.id }}" name="coauthors" rows="1" placeholder="Enter Coauthors, separated by commas">{{ poster.coauthors | join(', ') }}</textarea>
-				
-							<label for="poster-affiliations-{{ poster.id }}">Affiliations:</label>
-							<textarea id="poster-affiliations-{{ poster.id }}" name="affiliations" rows="1" placeholder="Enter Affiliations, separated by commas">{{ poster.affiliations | join(', ') }}</textarea>
-				
-							<label for="poster-abstract-{{ poster.id }}">Abstract:</label>
-							<textarea id="poster-abstract-{{ poster.id }}" name="abstract" rows="4" placeholder="Enter Abstract">{{ poster.abstract }}</textarea>
-				
-							<label for="poster-max-judges-{{ poster.id }}">Max Judges:</label>
-							<input type="number" id="poster-max-judges-{{ poster.id }}" name="max_judges" value="{{ poster.max_judges }}" placeholder="Enter Max Judges">
-				
-							<button type="submit">Save Changes</button>
-						</form>
+				<div class="poster-box" onclick="openModal('modal-{{ poster.id }}')">
+					<p><strong>{{ poster.number }}</strong></p>
+					<p>{{ poster.presenter }}</p>
+					<p>{{ poster.title }}</p>
+				</div>
 
-						<h3>Assigned Judges</h3>
-						<ul>
-							{% for token, judge in judges.items() %}
-								{% if poster.id in judge.selected_posters %}
-									<li>
-										{{ judge.name }}
-										<form method="POST" class="remove-judge-form" style="display:inline;">
-											<input type="hidden" name="action" value="remove_poster_from_judge">
-											<input type="hidden" name="token" value="{{ token }}">
-											<input type="hidden" name="poster_id" value="{{ poster.id }}">
-											<button type="submit" style="color: red;">Remove</button>
-										</form>
-									</li>
-								{% endif %}
-							{% endfor %}
-						</ul>
+				<div id="modal-{{ poster.id }}" class="modal">
+					<h2>Edit Poster</h2>
+					<form method="POST" class="edit-poster-form">
+						<input type="hidden" name="action" value="edit_poster">
+						<input type="hidden" name="poster_id" value="{{ poster.id }}">
+			
+						<label for="poster-title-{{ poster.id }}">Title:</label>
+						<textarea id="poster-title-{{ poster.id }}" name="title" rows="1" placeholder="Enter Title">{{ poster.title }}</textarea>
+			
+						<label for="poster-number-{{ poster.id }}">Number:</label>
+						<input type="text" id="poster-number-{{ poster.id }}" name="number" value="{{ poster.number }}" placeholder="Enter Poster Number">
+			
+						<label for="poster-presenter-{{ poster.id }}">Presenter:</label>
+						<input type="text" id="poster-presenter-{{ poster.id }}" name="presenter" value="{{ poster.presenter }}" placeholder="Enter Presenter Name">
+			
+						<label for="poster-coauthors-{{ poster.id }}">Coauthors:</label>
+						<textarea id="poster-coauthors-{{ poster.id }}" name="coauthors" rows="1" placeholder="Enter Coauthors, separated by commas">{{ poster.coauthors | join(', ') }}</textarea>
+			
+						<label for="poster-affiliations-{{ poster.id }}">Affiliations:</label>
+						<textarea id="poster-affiliations-{{ poster.id }}" name="affiliations" rows="1" placeholder="Enter Affiliations, separated by commas">{{ poster.affiliations | join(', ') }}</textarea>
+			
+						<label for="poster-abstract-{{ poster.id }}">Abstract:</label>
+						<textarea id="poster-abstract-{{ poster.id }}" name="abstract" rows="4" placeholder="Enter Abstract">{{ poster.abstract }}</textarea>
+			
+						<label for="poster-max-judges-{{ poster.id }}">Max Judges:</label>
+						<input type="number" id="poster-max-judges-{{ poster.id }}" name="max_judges" value="{{ poster.max_judges }}" placeholder="Enter Max Judges">
+			
+						<button type="submit">Save Changes</button>
 
-						<form method="POST" class="delete-poster-form">
-							<input type="hidden" name="action" value="delete_poster">
-							<input type="hidden" name="poster_id" value="{{ poster.id }}">
-							<button type="submit" style="color: red;">Delete Poster</button>
-						</form>
+						<input type="hidden" name="action" value="delete_poster">
+						<input type="hidden" name="poster_id" value="{{ poster.id }}">
+						<button type="submit" style="color: red;">Delete Poster</button>
+					</form>
 
-						<button class="modal-close">Close</button>
-					</div>
-				</li>
+					<h3>Assigned Judges</h3>
+					<ul>
+						{% for token, judge in judges.items() %}
+							{% if poster.id in judge.selected_posters %}
+								<li>
+									{{ judge.name }}
+									<form method="POST" class="remove-judge-form" style="display:inline;">
+										<input type="hidden" name="action" value="remove_poster_from_judge">
+										<input type="hidden" name="token" value="{{ token }}">
+										<input type="hidden" name="poster_id" value="{{ poster.id }}">
+										<button type="submit" style="color: red;">Remove</button>
+									</form>
+								</li>
+							{% endif %}
+						{% endfor %}
+					</ul>
+
+					<button class="modal-close">Close</button>
+				</div>
 			{% endfor %}
 		</ul>
+
 		<script>
-			// 非同期でポスター編集を実行
 			$(document).on("submit", ".edit-poster-form", function (e) {
 				e.preventDefault();
 				const form = $(this);
@@ -252,7 +440,6 @@
 				});
 			});
 		
-			// 非同期で審査員の割り当てを削除
 			$(document).on("submit", ".remove-judge-form", function (e) {
 				e.preventDefault();
 				const form = $(this);
@@ -264,6 +451,8 @@
 			});
 		</script>
 
+		<h2>Add New Posters</h2>
+		
 		<a href="#modal-add-poster" rel="modal:open">Add New Poster</a>
 		<div id="modal-add-poster" class="modal">
 			<h2>Add New Poster</h2>
@@ -297,43 +486,129 @@
 		</div>
 
 		<script>
-			// 非同期処理を使用してポスターを追加
 			$(document).on("submit", ".add-poster-form", function (e) {
 				e.preventDefault();
 				const form = $(this);
 				$.post(form.attr("action") || window.location.href, form.serialize(), function () {
 					alert("Poster added successfully!");
-					location.reload(); // 成功時にページをリロード
+					location.reload();
 				}).fail(function () {
 					alert("Failed to add the poster.");
 				});
 			});
 		</script>
 
+		<form action="/upload/posters" method="post" enctype="multipart/form-data">
+			<input type="file" name="file" accept=".xlsx" required>
+			<button type="submit">Upload Posters</button>
+		</form>
 
-		<!-- モーダル内容 -->
-		{% for poster in posters %}
-			<div id="modal-{{ poster.id }}" class="modal">
-				<h2>{{ poster.title }}</h2>
-				<p><strong>Number:</strong> {{ poster.number }}</p>
-				<p><strong>Presenter:</strong> {{ poster.presenter }}</p>
-				<p><strong>Coauthors:</strong> {{ poster.coauthors | join(', ') }}</p>
-				<p><strong>Affiliations:</strong> {{ poster.affiliations | join(', ') }}</p>
-				<p><strong>Abstract:</strong> {{ poster.abstract }}</p>
-				<p><strong>Max Judges:</strong> {{ poster.max_judges }}</p>
-				<p><strong>Current Judges:</strong> {{ poster.current_judges }}</p>
-				<button class="modal-close">Close</button>
-			</div>
-		{% endfor %}
+		<h2>Export Posters</h2>
+		<a href="/export/posters">Download Posters List</a>
 
-		<h2>Logout</h2>
+		<h2>Export Ratings</h2>
+		<a href="/export/ratings">Download Ratings</a>
 
-		<a href="/admin_logout">Logout</a>
+		</div>
 
+		<div class="pagination">
+			{% if current_page > 1 %}
+				<a href="?page={{ current_page - 1 }}" 
+				   class="pagination-link prev" 
+				   data-page="{{ current_page - 1 }}">
+				   Previous
+				</a>
+			{% endif %}
+		
+			{% for p in range(1, total_pages + 1) %}
+				<a href="?page={{ p }}" 
+				   class="pagination-link {% if p == current_page %}active{% endif %}" 
+				   data-page="{{ p }}">
+				   {{ p }}
+				</a>
+			{% endfor %}
+		
+			{% if current_page < total_pages %}
+				<a href="?page={{ current_page + 1 }}" 
+				   class="pagination-link next" 
+				   data-page="{{ current_page + 1 }}">
+				   Next
+				</a>
+			{% endif %}
+		</div>
+
+		<div id="scroll-to-top" class="scroll-to-top">
+			↑
+		</div>
+
+		<div id="scroll-to-btm" class="scroll-to-btm">
+			↓
+		</div>
+
+		<a href="/admin_logout" class="button01">Logout</a>
+
+		<!-- JavaScript -->
 		<script>
-			// jQueryでモーダルを手動で閉じるスクリプト
 			$(document).on('click', '.modal-close', function () {
-				$.modal.close(); // 手動でモーダルを閉じる
+				$.modal.close();
+			});
+
+			function openModal(modalId) {
+				$('#' + modalId).modal();
+			}
+
+			$(document).on('click', '.modal-close', function () {
+				$.modal.close();
+			});
+
+			window.addEventListener('load', function () {
+				const hash = location.hash;
+				if (hash) {
+					const element = document.querySelector(hash);
+					if (element) {
+						element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+					}
+				}
+			});
+
+			document.querySelectorAll('.pagination-link').forEach(link => {
+				link.addEventListener('click', function () {
+					const targetId = 'available-posters';
+					location.hash = targetId;
+				});
+			});
+
+			document.addEventListener("DOMContentLoaded", function () {
+				const paginationLinks = document.querySelectorAll(".pagination-link");
+				const scrollToTopButton = document.getElementById("scroll-to-top");
+				const scrollToBtmButton = document.getElementById("scroll-to-btm");
+
+				paginationLinks.forEach(link => {
+					link.addEventListener("click", function (e) {
+						const scrollPosition = window.scrollY;
+						localStorage.setItem("scrollPosition", scrollPosition);
+					});
+				});
+
+				const savedScrollPosition = localStorage.getItem("scrollPosition");
+				if (savedScrollPosition !== null) {
+					window.scrollTo(0, parseInt(savedScrollPosition, 10));
+					localStorage.removeItem("scrollPosition");
+				}
+
+				scrollToTopButton.addEventListener("click", function () {
+					window.scrollTo({
+						top: 0,
+						behavior: "smooth"
+					});
+				});
+
+				scrollToBtmButton.addEventListener("click", function () {
+					window.scrollTo({
+						top: document.body.scrollHeight,
+						behavior: "smooth"
+					});
+				});
 			});
 		</script>
 	</body>
