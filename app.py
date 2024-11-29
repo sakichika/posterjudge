@@ -44,10 +44,8 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
             self._delete_session(app, session)
             return
 
-        # セッションIDを取得
+        # セッションIDを取得し、文字列型に変換
         session_id = self._get_signer(app).sign(want_bytes(session.sid))
-        
-        # バイト列の場合は文字列に変換
         if isinstance(session_id, bytes):
             session_id = session_id.decode('utf-8')
 
@@ -64,20 +62,18 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
             samesite=self.get_cookie_samesite(app),
         )
 
-        # Redis にセッションを保存
+        # Redis にセッションデータを保存
         self.redis.setex(
             self.key_prefix + session_id,
             int(self.permanent_session_lifetime.total_seconds()),
             self.serializer.dumps(dict(session)),
         )
 
-# セッションインターフェースを置き換え
+# Flask-Session のカスタムセッションインターフェースを設定
 app.session_interface = PatchedRedisSessionInterface(redis_client, app.config["SESSION_KEY_PREFIX"])
-
 
 # Flask-Session の初期化
 Session(app)
-
 
 # ログに設定確認を出力
 logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
@@ -661,3 +657,4 @@ def judge_logout():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000)) 
     app.run(host="0.0.0.0", port=port, debug=True)
+    print(f"Session ID type: {type(session_id)}")
