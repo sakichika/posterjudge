@@ -33,8 +33,10 @@ app.config.update({
     "SESSION_REDIS": redis_client,
 })
 
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "default-secret-key")
 # Flask-Session の初期化
 Session(app)
+
 
 # ログに設定確認を出力
 logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
