@@ -30,9 +30,8 @@ app.config.update({
     "SESSION_PERMANENT": False,
     "SESSION_USE_SIGNER": True,
     "SESSION_KEY_PREFIX": "session:",
-    "SESSION_COOKIE_NAME": "flask_session",
     "SESSION_REDIS": redis_client,
-    "SECRET_KEY": os.getenv("SECRET_KEY", "your_secret_key"),  # 環境変数から取得（デフォルト値設定）
+    "SECRET_KEY": os.getenv("SECRET_KEY", "your_secret_key"),
 })
 
 # Flask-Session の初期化
@@ -616,4 +615,5 @@ def judge_logout():
     return redirect(url_for("index"))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.getenv("PORT", 5000)) 
+    app.run(host="0.0.0.0", port=port, debug=True)
