@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 # Redis URLを環境変数から取得
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-redis_client = redis.from_url(redis_url)
+redis_client = Redis.from_url(redis_url)
 
 # Flask-Session 設定
 app.config["SESSION_TYPE"] = "redis"
