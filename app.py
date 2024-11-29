@@ -44,6 +44,9 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
             return
 
         session_id = self._get_signer(app).sign(want_bytes(session.sid))
+
+        print(f"Session ID (type): {type(session_id)}")
+        print(f"Session ID: {session_id}")
         if isinstance(session_id, bytes):
             session_id = session_id.decode("utf-8")  # バイト列を文字列に変換
 
@@ -74,9 +77,6 @@ app.session_interface = PatchedRedisSessionInterface(
 
 # Flask-Session の初期化
 Session(app)
-
-print(f"Session ID (type): {type(session_id)}")
-print(f"Session ID: {session_id}")
 
 # ログに設定確認を出力
 logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
