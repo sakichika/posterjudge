@@ -473,8 +473,9 @@ def generate_judge_token():
 
 @app.route("/judge/<token>", methods=["GET", "POST"])
 def judge_page(token):
+    # トークンのバリデーション
     if token not in judges:
-        return "Invalid token", 403
+        return render_template("error.html", message="Invalid token.")
 
     judge_data = judges[token]
     judge_data["selected_posters"] = [int(poster_id) for poster_id in judge_data["selected_posters"]]
