@@ -3,11 +3,10 @@ from io import BytesIO
 import pandas as pd
 import threading, os, json, random, string
 from redis import Redis
-from math import ceil
 from flask_session import Session
-
 import logging
 
+# Flaskアプリケーションの初期化
 app = Flask(__name__)
 
 # Logging 設定
@@ -20,36 +19,20 @@ try:
     redis_client = Redis.from_url(redis_url)
     redis_client.ping()
     logger.debug("Connected to Redis successfully!")
-except redis.ConnectionError as e:
-    logger.error("Failed to connect to Redis.", exc_info=e)
-    raise e
+except Exception as e:
+    logger.error(f"Failed to connect to Redis: {e}")
+    raise
 
 # Flask-Session 設定
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_USE_SIGNER"] = True  # セッションIDを署名付き文字列に変換
+app.config["SESSION_USE_SIGNER"] = True
 app.config["SESSION_KEY_PREFIX"] = "session:"
 app.config["SESSION_REDIS"] = redis_client
-app.config["SESSION_COOKIE_NAME"] = "flask_session"
+app.config["SESSION_COOKIE_NAME"] = "session"
 
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "default-secret-key")
-
-logger = logging.getLogger(__name__)
-from flask.sessions import SecureCookieSessionInterface
-
-class CustomSessionInterface(SecureCookieSessionInterface):
-    def save_session(self, app, session, response):
-        if not session:
-            if session.modified:
-                response.delete_cookie(app.session_cookie_name)
-            return
-
-        sid = session.sid if isinstance(session.sid, str) else session.sid.decode("utf-8")
-        response.set_cookie(app.session_cookie_name, sid, httponly=True, secure=False)
-
-# Flaskのセッションインターフェースをカスタムクラスに設定
-app.session_interface = CustomSessionInterface()
-
+# シークレットキーを安全に生成
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "".join(random.choices(string.ascii_letters + string.digits, k=24)))
 
 # Flask-Session の初期化
 Session(app)
