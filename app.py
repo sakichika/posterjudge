@@ -33,8 +33,6 @@ app.config.update({
     "SESSION_REDIS": redis_client,
 })
 
-app.config.pop("SESSION_COOKIE_NAME", None)
-
 # Flask-Session の初期化
 Session(app)
 
