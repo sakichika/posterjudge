@@ -25,68 +25,30 @@ except redis.ConnectionError as e:
     raise e
 
 # Flask-Session 設定
-app.config.update({
-    "SESSION_TYPE": "redis",
-    "SESSION_PERMANENT": False,
-    "SESSION_USE_SIGNER": True,
-    "SESSION_KEY_PREFIX": "session:",
-    "SESSION_REDIS": redis_client,
-})
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True  # セッションIDを署名付き文字列に変換
+app.config["SESSION_KEY_PREFIX"] = "session:"
+app.config["SESSION_REDIS"] = redis_client
+app.config["SESSION_COOKIE_NAME"] = "flask_session"
 
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "default-secret-key")
 
 logger = logging.getLogger(__name__)
+from flask.sessions import SecureCookieSessionInterface
 
-from flask_session.sessions import RedisSessionInterface
-
-class PatchedRedisSessionInterface(RedisSessionInterface):
+class CustomSessionInterface(SecureCookieSessionInterface):
     def save_session(self, app, session, response):
         if not session:
             if session.modified:
-                response.delete_cookie(
-                    app.session_cookie_name,
-                    domain=self.get_cookie_domain(app),
-                    path=self.get_cookie_path(app),
-                )
+                response.delete_cookie(app.session_cookie_name)
             return
 
-        session_id = self._get_signer(app).sign(want_bytes(session.sid))
+        sid = session.sid if isinstance(session.sid, str) else session.sid.decode("utf-8")
+        response.set_cookie(app.session_cookie_name, sid, httponly=True, secure=False)
 
-        if isinstance(session_id, bytes):
-            logger.debug(f"Session ID before decode: {session_id}")
-            session_id = session_id.decode("utf-8")
-            logger.debug(f"Session ID after decode: {session_id}")
-        
-        # 修正: session_id が bytes 型の場合にデコード
-        if isinstance(session_id, bytes):
-            session_id = session_id.decode("utf-8")
-
-        response.set_cookie(
-            app.session_cookie_name,
-            session_id,
-            max_age=self.get_expiration_time(app, session),
-            expires=self.get_expiration_time(app, session),
-            path=self.get_cookie_path(app),
-            domain=self.get_cookie_domain(app),
-            secure=self.get_cookie_secure(app),
-            httponly=self.get_cookie_httponly(app),
-            samesite=self.get_cookie_samesite(app),
-        )
-
-        redis_key = self.key_prefix + session_id
-        redis_data = self.serializer.dumps(dict(session))
-        redis_ttl = int(self.permanent_session_lifetime.total_seconds())
-
-        self.redis.setex(redis_key, redis_ttl, redis_data)
-
-# Redis クライアントの作成
-redis_client = Redis.from_url("redis://localhost:6379/0")
-
-# パッチ済みのセッションインターフェースを設定
-app.session_interface = PatchedRedisSessionInterface(
-    redis=redis_client,
-    key_prefix=app.config.get("SESSION_KEY_PREFIX", "session:")  # デフォルト値を設定
-)
+# Flaskのセッションインターフェースをカスタムクラスに設定
+app.session_interface = CustomSessionInterface()
 
 
 # Flask-Session の初期化
@@ -161,6 +123,13 @@ def generate_token(length=16):
     return ''.join(random.choices(characters, k=length))
 
 # Routes
+import logging
+logging.basicConfig(level=logging.DEBUG)
+@app.before_request
+def debug_session():
+    logging.debug(f"Session contents: {dict(session)}")
+    logging.debug(f"Session ID: {session.sid if hasattr(session, 'sid') else 'No SID'}")
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
