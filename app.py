@@ -40,6 +40,7 @@ Session(app)
 # ログに設定確認を出力
 logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
 logger.debug(f"Session Redis: {app.config['SESSION_REDIS']}")
+logger.debug(f"Session interface: {app.session_interface}")
 
 # スレッドロック
 lock = threading.Lock()
