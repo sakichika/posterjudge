@@ -83,7 +83,10 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
 redis_client = Redis.from_url("redis://localhost:6379/0")
 
 # パッチ済みのセッションインターフェースを設定
-app.session_interface = PatchedRedisSessionInterface(redis=redis_client)
+app.session_interface = PatchedRedisSessionInterface(
+    redis=redis_client,
+    key_prefix=app.config.get("SESSION_KEY_PREFIX", "session:")  # デフォルト値を設定
+)
 
 
 # Flask-Session の初期化
