@@ -1,14 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from io import BytesIO
 import pandas as pd
-import threading
+import threading, os, json, random, string, redis
 from math import ceil
-import redis
 from flask_session import Session
-import os
-import json
-import random
-import string
 
 # Redis URLを環境変数から取得
 REDIS_URL = os.getenv("REDIS_URL")
