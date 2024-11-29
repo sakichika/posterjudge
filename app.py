@@ -31,8 +31,9 @@ app.config.update({
     "SESSION_USE_SIGNER": True,
     "SESSION_KEY_PREFIX": "session:",
     "SESSION_REDIS": redis_client,
-    "SECRET_KEY": os.getenv("SECRET_KEY", "your_secret_key"),
 })
+
+app.config.pop("SESSION_COOKIE_NAME", None)
 
 # Flask-Session の初期化
 Session(app)
@@ -40,6 +41,7 @@ Session(app)
 # ログに設定確認を出力
 logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
 logger.debug(f"Session Redis: {app.config['SESSION_REDIS']}")
+logger.debug(f"Session config: {app.config}")
 logger.debug(f"Session interface: {app.session_interface}")
 
 # スレッドロック
