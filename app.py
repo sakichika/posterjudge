@@ -8,6 +8,7 @@ from flask_session import Session
 
 import logging
 
+app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -27,8 +28,6 @@ try:
     print("Connected to Redis successfully!")
 except redis.exceptions.ConnectionError as e:
     print(f"Failed to connect to Redis: {e}")
-
-app = Flask(__name__)
 
 # Flask-Sessionの設定
 app.config["SESSION_TYPE"] = "redis"
