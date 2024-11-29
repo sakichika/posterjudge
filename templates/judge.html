@@ -229,6 +229,7 @@
 
 		<!-- Selected Posters -->
 		<h2>Your Selected Posters</h2>
+		<ul>
 		{% for poster in selected_posters %}
 			<div class="poster-box" onclick="openModal('modal-{{ poster.id }}')">
 				<p><strong>{{ poster.number }}</strong></p>
@@ -266,10 +267,12 @@
 		{% else %}
 			<p>No posters selected.</p>
 		{% endfor %}
+		</ul>
 
 		<!-- Available Posters -->
-		<div id="available-posters">
+		 <div id="available-posters">
 			<h2>Available Posters</h2>
+			<ul>
 			{% for poster in available_posters %}
 				{% if poster.id not in judge.selected_posters and poster.current_judges < poster.max_judges %}
 					<div class="poster-box" onclick="openModal('modal-available-{{ poster.id }}')">
@@ -297,6 +300,7 @@
 					</div>
 				{% endif %}
 			{% endfor %}
+		</ul>
 		</div>
 
 		<div class="pagination">

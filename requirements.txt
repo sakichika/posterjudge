@@ -1,0 +1,4 @@
+Flask==2.3.2
+Flask-Session==0.4.0
+pandas==2.1.1
+redis==5.0.0

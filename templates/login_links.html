@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judge Login Links</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        table th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Judge Login Links</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Judge Name</th>
+                <th>Login Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for name, link in login_links.items() %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td><a href="{{ link }}" target="_blank">{{ link }}</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

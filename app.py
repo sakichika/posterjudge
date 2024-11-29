@@ -1,18 +1,47 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from io import BytesIO
 import pandas as pd
-import asyncio
 import threading
 from math import ceil
-
-lock = threading.Lock()
-
+import redis
+from flask_session import Session
 import os
 import json
 import random
 import string
 
+# Redis URLを環境変数から取得
+REDIS_URL = os.getenv("REDIS_URL")
+
+# Redisクライアントを初期化
+redis_client = redis.Redis.from_url(REDIS_URL)
+
+# 動作確認: 接続テスト
+try:
+    redis_client.ping()
+    print("Connected to Redis successfully!")
+except redis.exceptions.ConnectionError as e:
+    print(f"Failed to connect to Redis: {e}")
+
 app = Flask(__name__)
+
+# Flask-Sessionの設定
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_KEY_PREFIX"] = "flask_session:"
+app.config["SESSION_REDIS"] = Redis.from_url(os.getenv("REDIS_URL"))
+
+# Flask-Sessionを初期化
+Session(app)
+
+@app.route("/")
+def index():
+    session["message"] = "Hello, Redis-backed session!"
+    return session["message"]
+
+lock = threading.Lock()
+
 app.secret_key = "your_secret_key"
 
 # Admin credentials
@@ -34,18 +63,15 @@ def load_posters():
     return [{"id": i, "title": f"Poster {i}", "max_judges": 6, "current_judges": 0} for i in range(1, 21)]
 
 def update_current_judges():
-    # 全てのポスターのcurrent_judgesをリセット
     for poster in posters:
         poster["current_judges"] = 0
 
-    # judges.jsonから現在の割り当てを再計算
     for judge in judges.values():
         for poster_id in judge["selected_posters"]:
             poster = next((p for p in posters if p["id"] == poster_id), None)
             if poster:
                 poster["current_judges"] += 1
 
-    # 更新後に保存
     save_posters(posters)
 
 # Save posters to JSON
@@ -67,7 +93,6 @@ def save_judges(judges_data):
             print(f"Judges successfully saved to {JUDGES_FILE}")
     except Exception as e:
         print(f"Error saving judges: {e}")
-
 
 # Initialize judges dictionary
 judges = load_judges()
@@ -97,13 +122,20 @@ def admin_login():
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session["admin"] = True
             print("Login successful")
-            return redirect(url_for("admin_dashboard"))  # 管理画面にリダイレクト
+            return redirect(url_for("admin_dashboard"))
         else:
             print("Login failed: Invalid credentials")
             return render_template("admin_login.html", error="Invalid credentials.")
     
     print("Rendering login page")
     return render_template("admin_login.html")
+
+@app.route("/generate_login_links")
+def generate_login_links():
+    base_url = request.host_url
+    login_links = {judge["name"]: f"{base_url}judge/{token}" for token, judge in judges.items()}
+
+    return render_template("login_links.html", login_links=login_links)
 
 @app.route("/admin/dashboard", methods=["GET", "POST"])
 def admin_dashboard():
@@ -519,6 +551,8 @@ def judge_page(token):
                 return jsonify({"message": "You have already selected this poster."}), 400
             elif len(judge_data["selected_posters"]) >= app.config.get("MAX_POSTERS_PER_JUDGE", 5):
                 return jsonify({"message": "You have reached your selection limit."}), 400
+            elif poster and poster["current_judges"] >= poster["max_judges"]:
+                return jsonify({"message": "This poster has reached its selection limit."}), 400
             elif poster and poster["current_judges"] < poster["max_judges"]:
                 with lock:
                     poster["current_judges"] += 1
@@ -527,8 +561,6 @@ def judge_page(token):
                 save_judges(judges)
                 update_current_judges()
                 return jsonify({"message": f"Poster selected successfully!"}), 200
-            else:
-                return jsonify({"message": "This poster has reached its selection limit."}), 400
 
         elif action == "deselect":
             if poster_id in judge_data["selected_posters"]:
@@ -584,4 +616,3 @@ def judge_logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
