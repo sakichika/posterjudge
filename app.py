@@ -11,28 +11,29 @@ import logging
 app = Flask(__name__)
 
 # Redis URLを環境変数から取得
-REDIS_URL = os.getenv("REDIS_URL")
+redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+redis_client = redis.from_url(redis_url)
 
-# Redisクライアントを初期化
-redis_client = Redis.from_url(REDIS_URL)
-
-# 動作確認: 接続テスト
-try:
-    redis_client.ping()
-    print("Connected to Redis successfully!")
-except redis.exceptions.ConnectionError as e:
-    print(f"Failed to connect to Redis: {e}")
-
-# Flask-Sessionの設定
+# Flask-Session 設定
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_USE_SIGNER"] = True
 app.config["SESSION_KEY_PREFIX"] = "session:"
 app.config["SESSION_COOKIE_NAME"] = "flask_session"
-app.config["SESSION_REDIS"] = Redis.from_url(os.getenv("REDIS_URL"))
+app.config["SESSION_REDIS"] = redis_client
 
-# Flask-Sessionを初期化
+# Flask-Session の初期化
 Session(app)
+
+# 確認ログ
+print(f"Session Type: {app.config['SESSION_TYPE']}")
+print(f"Session Redis: {app.config['SESSION_REDIS']}")
+
+try:
+    redis_client.ping()
+    print("Connected to Redis successfully!")
+except redis.ConnectionError:
+    print("Failed to connect to Redis.")
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
