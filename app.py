@@ -10,41 +10,40 @@ import logging
 
 app = Flask(__name__)
 
+# Logging 設定
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 # Redis URLを環境変数から取得
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-redis_client = Redis.from_url(redis_url)
+try:
+    redis_client = Redis.from_url(redis_url)
+    redis_client.ping()
+    logger.debug("Connected to Redis successfully!")
+except redis.ConnectionError as e:
+    logger.error("Failed to connect to Redis.", exc_info=e)
+    raise e
 
 # Flask-Session 設定
-app.config["SESSION_TYPE"] = "redis"
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_USE_SIGNER"] = True
-app.config["SESSION_KEY_PREFIX"] = "session:"
-app.config["SESSION_COOKIE_NAME"] = "flask_session"
-app.config["SESSION_REDIS"] = redis_client
+app.config.update({
+    "SESSION_TYPE": "redis",
+    "SESSION_PERMANENT": False,
+    "SESSION_USE_SIGNER": True,
+    "SESSION_KEY_PREFIX": "session:",
+    "SESSION_COOKIE_NAME": "flask_session",
+    "SESSION_REDIS": redis_client,
+    "SECRET_KEY": os.getenv("SECRET_KEY", "your_secret_key"),  # 環境変数から取得（デフォルト値設定）
+})
 
 # Flask-Session の初期化
 Session(app)
 
-# 確認ログ
-print(f"Session Type: {app.config['SESSION_TYPE']}")
-print(f"Session Redis: {app.config['SESSION_REDIS']}")
-
-try:
-    redis_client.ping()
-    print("Connected to Redis successfully!")
-except redis.ConnectionError:
-    print("Failed to connect to Redis.")
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-app.config["SESSION_TYPE"] = "redis"
+# ログに設定確認を出力
 logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
 logger.debug(f"Session Redis: {app.config['SESSION_REDIS']}")
 
+# スレッドロック
 lock = threading.Lock()
-
-app.secret_key = "your_secret_key"
 
 # Admin credentials
 ADMIN_USERNAME = "admin"
