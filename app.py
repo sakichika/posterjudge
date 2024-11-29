@@ -38,18 +38,20 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "default-secret-key")
 from flask_session.sessions import RedisSessionInterface
 from itsdangerous import want_bytes
 
-# RedisSessionInterfaceを拡張
 class PatchedRedisSessionInterface(RedisSessionInterface):
     def save_session(self, app, session, response):
         if not session:
             self._delete_session(app, session)
             return
 
-        # セッションIDを文字列に変換
+        # セッションIDを取得
         session_id = self._get_signer(app).sign(want_bytes(session.sid))
+        
+        # バイト列の場合は文字列に変換
         if isinstance(session_id, bytes):
-            session_id = session_id.decode('utf-8')  # バイト列を文字列に変換
+            session_id = session_id.decode('utf-8')
 
+        # Cookie に設定
         response.set_cookie(
             app.session_cookie_name,
             session_id,
@@ -61,13 +63,15 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
             httponly=self.get_cookie_httponly(app),
             samesite=self.get_cookie_samesite(app),
         )
+
+        # Redis にセッションを保存
         self.redis.setex(
             self.key_prefix + session_id,
             int(self.permanent_session_lifetime.total_seconds()),
             self.serializer.dumps(dict(session)),
         )
 
-# セッションインターフェースを拡張版に変更
+# セッションインターフェースを置き換え
 app.session_interface = PatchedRedisSessionInterface(redis_client, app.config["SESSION_KEY_PREFIX"])
 
 
