@@ -34,25 +34,33 @@ app.config.update({
 })
 
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "default-secret-key")
+
+logger = logging.getLogger(__name__)
+
 from flask_session.sessions import RedisSessionInterface
-from itsdangerous import want_bytes
 
 class PatchedRedisSessionInterface(RedisSessionInterface):
     def save_session(self, app, session, response):
         if not session:
-            self._delete_session(app, session)
+            if session.modified:
+                response.delete_cookie(
+                    app.session_cookie_name,
+                    domain=self.get_cookie_domain(app),
+                    path=self.get_cookie_path(app),
+                )
             return
 
-        # セッションID生成
         session_id = self._get_signer(app).sign(want_bytes(session.sid))
 
-        # 型がbytesの場合、デコードしてstr型に変換
+        if isinstance(session_id, bytes):
+            logger.debug(f"Session ID before decode: {session_id}")
+            session_id = session_id.decode("utf-8")
+            logger.debug(f"Session ID after decode: {session_id}")
+        
+        # 修正: session_id が bytes 型の場合にデコード
         if isinstance(session_id, bytes):
             session_id = session_id.decode("utf-8")
-        
-        print(f"DEBUG: session_id type: {type(session_id)}, value: {session_id}")
 
-        # クッキーにセッションIDを設定
         response.set_cookie(
             app.session_cookie_name,
             session_id,
@@ -65,15 +73,17 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
             samesite=self.get_cookie_samesite(app),
         )
 
-        # セッションデータをRedisに保存
-        self.redis.setex(
-            self.key_prefix + session_id,
-            int(self.permanent_session_lifetime.total_seconds()),
-            self.serializer.dumps(dict(session)),
-        )
+        redis_key = self.key_prefix + session_id
+        redis_data = self.serializer.dumps(dict(session))
+        redis_ttl = int(self.permanent_session_lifetime.total_seconds())
 
-# アプリケーションにカスタムセッションインターフェースを設定
-app.session_interface = PatchedRedisSessionInterface(redis_client, app.config["SESSION_KEY_PREFIX"])
+        self.redis.setex(redis_key, redis_ttl, redis_data)
+
+# Redis クライアントの作成
+redis_client = Redis.from_url("redis://localhost:6379/0")
+
+# パッチ済みのセッションインターフェースを設定
+app.session_interface = PatchedRedisSessionInterface(redis=redis_client)
 
 
 # Flask-Session の初期化
