@@ -90,7 +90,7 @@ lock = threading.Lock()
 
 # Admin credentials
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "password123"
+ADMIN_PASSWORD = "password"
 
 # File to store judges
 JUDGES_FILE = "judges.json"
