@@ -43,13 +43,16 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
             self._delete_session(app, session)
             return
 
+        # セッションID生成
         session_id = self._get_signer(app).sign(want_bytes(session.sid))
 
-        print(f"Session ID (type): {type(session_id)}")
-        print(f"Session ID: {session_id}")
+        # 型がbytesの場合、デコードしてstr型に変換
         if isinstance(session_id, bytes):
-            session_id = session_id.decode("utf-8")  # バイト列を文字列に変換
+            session_id = session_id.decode("utf-8")
+        
+        print(f"DEBUG: session_id type: {type(session_id)}, value: {session_id}")
 
+        # クッキーにセッションIDを設定
         response.set_cookie(
             app.session_cookie_name,
             session_id,
@@ -70,9 +73,7 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
         )
 
 # アプリケーションにカスタムセッションインターフェースを設定
-app.session_interface = PatchedRedisSessionInterface(
-    redis_client, app.config["SESSION_KEY_PREFIX"]
-)
+app.session_interface = PatchedRedisSessionInterface(redis_client)
 
 
 # Flask-Session の初期化
