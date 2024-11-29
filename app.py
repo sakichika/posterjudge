@@ -9,12 +9,6 @@ from flask_session import Session
 import logging
 
 app = Flask(__name__)
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-app.config["SESSION_TYPE"] = "redis"
-logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
-logger.debug(f"Session Redis: {app.config['SESSION_REDIS']}")
 
 # Redis URLを環境変数から取得
 REDIS_URL = os.getenv("REDIS_URL")
@@ -39,6 +33,13 @@ app.config["SESSION_REDIS"] = Redis.from_url(os.getenv("REDIS_URL"))
 
 # Flask-Sessionを初期化
 Session(app)
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+app.config["SESSION_TYPE"] = "redis"
+logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
+logger.debug(f"Session Redis: {app.config['SESSION_REDIS']}")
 
 lock = threading.Lock()
 
