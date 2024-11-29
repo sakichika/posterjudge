@@ -31,11 +31,6 @@ app.config["SESSION_REDIS"] = Redis.from_url(os.getenv("REDIS_URL"))
 # Flask-Sessionを初期化
 Session(app)
 
-@app.route("/")
-def index():
-    session["message"] = "Hello, Redis-backed session!"
-    return session["message"]
-
 lock = threading.Lock()
 
 app.secret_key = "your_secret_key"
