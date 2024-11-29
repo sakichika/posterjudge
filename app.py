@@ -73,7 +73,7 @@ class PatchedRedisSessionInterface(RedisSessionInterface):
         )
 
 # アプリケーションにカスタムセッションインターフェースを設定
-app.session_interface = PatchedRedisSessionInterface(redis_client)
+app.session_interface = PatchedRedisSessionInterface(redis_client, app.config["SESSION_KEY_PREFIX"])
 
 
 # Flask-Session の初期化
