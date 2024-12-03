@@ -155,12 +155,14 @@ def admin_dashboard():
         action = request.form.get("action")
 
         if action == "add_judge":
+            print("Requested add_judge")
             name = request.form.get("name")
             token = generate_token()
             judges[token] = {"name": name, "selected_posters": []}
             save_judges(judges)
 
         elif action == "edit_judge_name":
+            print("Requested edit_judge_name")
             token = request.form.get("token")
             new_name = request.form.get("new_name")
             if token in judges:
@@ -168,6 +170,7 @@ def admin_dashboard():
                 save_judges(judges)
         
         elif action == "delete_judge":
+            print("Requested delete_judge")
             token = request.form["token"]
             if token in judges:
                 for poster_id in judges[token]["selected_posters"]:
@@ -179,6 +182,7 @@ def admin_dashboard():
                 save_posters(posters)
 
         elif action == "delete_poster":
+            print("Requested delete_poster")
             try:
                 poster_id = int(request.form.get("poster_id", 0))
                 if poster_id == 0:
@@ -202,6 +206,7 @@ def admin_dashboard():
 
 
         elif action == "regenerate_token":
+            print("Requested regenerate_token")
             old_token = request.form.get("old_token")
             if old_token in judges:
                 new_token = generate_token(16)
@@ -211,6 +216,7 @@ def admin_dashboard():
                 save_judges(judges)
 
         elif action == "remove_poster_from_judge":
+            print("Requested remove_poster_from_judge")
             token = request.form.get("token")
             poster_id = int(request.form.get("poster_id"))
             if token in judges and poster_id in judges[token]["selected_posters"]:
@@ -222,6 +228,7 @@ def admin_dashboard():
                 save_posters(posters)
 
         elif action == "add_poster":
+            print("Requested add_poster")
             title = request.form.get("title")
             max_judges = int(request.form.get("max_judges"))
             new_id = max(p["id"] for p in posters) + 1 if posters else 1
@@ -229,6 +236,7 @@ def admin_dashboard():
             save_posters(posters)
 
         elif action == "delete_poster":
+            print("Requested delete_poster")
             poster_id = int(request.form.get("poster_id"))
             posters[:] = [p for p in posters if p["id"] != poster_id]
             for token in judges:
@@ -238,6 +246,7 @@ def admin_dashboard():
             save_judges(judges)
 
         elif action == "edit_poster":
+            print("Requested edit_poster")
             try:
                 poster_id = int(request.form["poster_id"])
                 poster = next((p for p in posters if p["id"] == poster_id), None)
