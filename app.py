@@ -4,6 +4,7 @@ import pandas as pd
 import threading, os, json, random, string
 from redis import Redis
 from flask_session import Session
+from flask.sessions import SecureCookieSessionInterface
 import logging
 
 # Flaskアプリケーションの初期化
@@ -33,6 +34,25 @@ app.config["SESSION_COOKIE_NAME"] = "session"
 
 # シークレットキーを安全に生成
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "".join(random.choices(string.ascii_letters + string.digits, k=24)))
+
+# カスタムセッションインターフェース
+class PatchedSessionInterface(SecureCookieSessionInterface):
+    def save_session(self, app, session, response):
+        if not session:
+            if session.modified:
+                response.delete_cookie(app.session_cookie_name)
+            return
+        session_id = session.sid if isinstance(session.sid, str) else session.sid.decode("utf-8")
+        response.set_cookie(
+            app.session_cookie_name,
+            session_id,
+            httponly=True,
+            secure=app.config.get("SESSION_COOKIE_SECURE", False),
+            samesite=app.config.get("SESSION_COOKIE_SAMESITE", None),
+        )
+
+# カスタムインターフェースを設定
+app.session_interface = PatchedSessionInterface()
 
 # Flask-Session の初期化
 Session(app)
