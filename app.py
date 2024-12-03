@@ -2,30 +2,20 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from io import BytesIO
 import pandas as pd
 import threading, os, json, random, string
-from redis import Redis
 from math import ceil
 from flask_session import Session
 from flask.sessions import SecureCookieSessionInterface
-import logging
+from redis import Redis
 
-# Flaskアプリケーションの初期化
 app = Flask(__name__)
 
-# Logging 設定
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-# Redis URLを環境変数から取得
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 try:
     redis_client = Redis.from_url(redis_url)
     redis_client.ping()
-    logger.debug("Connected to Redis successfully!")
 except Exception as e:
-    logger.error(f"Failed to connect to Redis: {e}")
     raise
 
-# Flask-Session 設定
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_USE_SIGNER"] = True
@@ -33,10 +23,8 @@ app.config["SESSION_KEY_PREFIX"] = "session:"
 app.config["SESSION_REDIS"] = redis_client
 app.config["SESSION_COOKIE_NAME"] = "session"
 
-# シークレットキーを安全に生成
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "".join(random.choices(string.ascii_letters + string.digits, k=24)))
 
-# カスタムセッションインターフェース
 class PatchedSessionInterface(SecureCookieSessionInterface):
     def save_session(self, app, session, response):
         if not session:
@@ -52,19 +40,10 @@ class PatchedSessionInterface(SecureCookieSessionInterface):
             samesite=app.config.get("SESSION_COOKIE_SAMESITE", None),
         )
 
-# カスタムインターフェースを設定
 app.session_interface = PatchedSessionInterface()
 
-# Flask-Session の初期化
 Session(app)
 
-# ログに設定確認を出力
-logger.debug(f"Session Type: {app.config['SESSION_TYPE']}")
-logger.debug(f"Session Redis: {app.config['SESSION_REDIS']}")
-logger.debug(f"Session config: {app.config}")
-logger.debug(f"Session interface: {app.session_interface}")
-
-# スレッドロック
 lock = threading.Lock()
 
 # Admin credentials
@@ -113,7 +92,6 @@ def save_judges(judges_data):
     try:
         with open(JUDGES_FILE, "w") as file:
             json.dump(judges_data, file, indent=4)
-            print(f"Judges successfully saved to {JUDGES_FILE}")
     except Exception as e:
         print(f"Error saving judges: {e}")
 
@@ -191,30 +169,26 @@ def admin_dashboard():
         elif action == "delete_judge":
             token = request.form["token"]
             if token in judges:
-                # 削除する審査員が選択したポスターを更新
                 for poster_id in judges[token]["selected_posters"]:
                     poster = next((p for p in posters if p["id"] == poster_id), None)
                     if poster:
-                        poster["current_judges"] -= 1  # 選択中のポスター数を減少
-                # 審査員を削除
+                        poster["current_judges"] -= 1
                 del judges[token]
                 save_judges(judges)
                 save_posters(posters)
 
         elif action == "delete_poster":
             try:
-                poster_id = int(request.form.get("poster_id", 0))  # デフォルト値を0に設定
+                poster_id = int(request.form.get("poster_id", 0))
                 if poster_id == 0:
                     return "Invalid poster ID1", 400
 
-                # ポスターの削除
                 poster_to_delete = next((p for p in posters if p["id"] == poster_id), None)
                 if not poster_to_delete:
                     return "Poster not found", 404
 
                 posters.remove(poster_to_delete)
 
-                # 削除したポスターを選択していた審査員からも削除
                 for token in judges:
                     if poster_id in judges[token]["selected_posters"]:
                         judges[token]["selected_posters"].remove(poster_id)
@@ -268,16 +242,14 @@ def admin_dashboard():
                 poster = next((p for p in posters if p["id"] == poster_id), None)
 
                 if poster:
-                    # 更新されたデータを取得
                     poster["number"] = request.form["number"]
                     poster["title"] = request.form["title"]
                     poster["presenter"] = request.form["presenter"]
-                    poster["coauthors"] = request.form["coauthors"].split(",")  # カンマ区切りの文字列をリストに変換
+                    poster["coauthors"] = request.form["coauthors"].split(",")
                     poster["affiliations"] = request.form["affiliations"].split(",")
                     poster["abstract"] = request.form["abstract"]
                     poster["max_judges"] = int(request.form["max_judges"])
 
-                    # 保存
                     save_posters(posters)
                     message = f"Poster {poster_id} updated successfully!"
                 else:
@@ -285,23 +257,20 @@ def admin_dashboard():
             except Exception as e:
                 message = f"Error updating poster: {str(e)}"
 
-    # 名前順でソートされた審査員リストを生成
     sorted_judges = dict(sorted(judges.items(), key=lambda item: item[1]["name"]))
 
-    # 審査状況を生成
     poster_assignments = {p["id"]: {"title": p["title"], "judges": []} for p in posters}
     for token, data in sorted_judges.items():
         for poster_id in data["selected_posters"]:
             if poster_id in poster_assignments:
                 poster_assignments[poster_id]["judges"].append(data["name"])
 
-    # ページネーション関連
     page = int(request.args.get("page", 1))
 
     try:
-        page = int(page)  # ページ番号を整数に変換
+        page = int(page)
     except ValueError:
-        page = 1  # ページ番号が無効な場合は1に戻す
+        page = 1
     
     per_page = 10
     total_pages = ceil(len(posters) / per_page)
@@ -324,7 +293,6 @@ def admin_panel():
     if request.method == "POST":
         action = request.form.get("action")
         
-        # 審査員の名前を編集
         if action == "edit_judge_name":
             token = request.form.get("token")
             new_name = request.form.get("new_name")
@@ -332,41 +300,34 @@ def admin_panel():
                 judges[token]["name"] = new_name
                 save_judges(judges)
 
-        # トークンを再生成
         elif action == "regenerate_token":
             old_token = request.form.get("old_token")
             if old_token in judges:
                 new_token = generate_token(16)
-                while new_token in judges:  # 一意性を保証
+                while new_token in judges:
                     new_token = generate_token(16)
                 judges[new_token] = judges.pop(old_token)
                 save_judges(judges)
 
-    # 名前順でソートされた審査員リストを作成
     sorted_judges = dict(sorted(judges.items(), key=lambda item: item[1]["name"]))
 
-    # テンプレートにデータを渡す
     return render_template("admin.html", judges=sorted_judges, posters=posters)
 
 @app.route("/admin/regenerate_token", methods=["POST"])
 def regenerate_token():
     old_token = request.form.get("old_token")
     
-    # トークンが存在しない場合の処理
     if old_token not in judges:
         print(f"Token {old_token} not found in judges.")
         return "Invalid token", 400
 
-    # 新しいトークン生成
     new_token = generate_token(16)
-    while new_token in judges:  # 一意性の保証
+    while new_token in judges:
         new_token = generate_token(16)
 
-    # データの更新
     judges[new_token] = judges.pop(old_token)
     print(f"Token regenerated: {old_token} -> {new_token}")
 
-    # データ保存
     save_judges(judges)
     return redirect("/admin/dashboard")
 
@@ -378,12 +339,11 @@ def upload_judges():
         return "No file uploaded", 400
 
     try:
-        # 読み込んだ Excel ファイルを DataFrame に変換
         df = pd.read_excel(file)
         for _, row in df.iterrows():
             name = row.get("Name")
             email = row.get("Email", "")
-            if name:  # 名前が必須
+            if name:
                 token = generate_token()
                 judges[token] = {"name": name, "email": email, "selected_posters": []}
         save_judges(judges)
@@ -399,7 +359,6 @@ def upload_posters():
         return "No file uploaded", 400
 
     try:
-        # 読み込んだ Excel ファイルを DataFrame に変換
         df = pd.read_excel(file)
         for _, row in df.iterrows():
             number = row.get("Number")
@@ -410,7 +369,7 @@ def upload_posters():
             abstract = row.get("Abstract", "")
             max_judges = int(row.get("Max Judges", 0))
 
-            if number and title and presenter:  # 必須項目をチェック
+            if number and title and presenter:
                 new_id = max(p["id"] for p in posters) + 1 if posters else 1
                 posters.append({
                     "id": new_id,
@@ -430,7 +389,6 @@ def upload_posters():
 
 @app.route("/export/judges", methods=["GET"])
 def export_judges():
-    # Prepare judges data
     judges_df = pd.DataFrame([
         {"Name": data["name"], 
          "Email": data.get("email", ""),
@@ -439,13 +397,11 @@ def export_judges():
         for token, data in judges.items()
     ])
 
-    # Export to Excel
     judges_file = BytesIO()
     with pd.ExcelWriter(judges_file, engine='openpyxl') as writer:
         judges_df.to_excel(writer, index=False, sheet_name="Judges")
     judges_file.seek(0)
 
-    # Send file as attachment
     return send_file(
         judges_file,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -455,7 +411,6 @@ def export_judges():
 
 @app.route("/export/posters", methods=["GET"])
 def export_posters():
-    # Prepare posters data
     posters_df = pd.DataFrame([
         {
             "Number": poster["number"],
@@ -469,13 +424,11 @@ def export_posters():
         for poster in posters
     ])
 
-    # Export to Excel
     posters_file = BytesIO()
     with pd.ExcelWriter(posters_file, engine='openpyxl') as writer:
         posters_df.to_excel(writer, index=False, sheet_name="Posters")
     posters_file.seek(0)
 
-    # Send file as attachment
     return send_file(
         posters_file,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -485,29 +438,24 @@ def export_posters():
 
 @app.route("/export/ratings", methods=["GET"])
 def export_ratings():
-    # 各ポスターのデータを収集
     ratings_data = []
-    all_judges = {judges[token]["name"]: token for token in judges}  # すべての審査員名を取得
+    all_judges = {judges[token]["name"]: token for token in judges} 
 
     for poster in posters:
-        # ポスターごとの基本情報
         poster_data = {
             "Poster Number": poster["number"],
             "Title": poster["title"],
             "Presenter": poster["presenter"],
         }
 
-        # 審査員ごとのスコアを追加
         for judge_name, token in all_judges.items():
-            score = judges[token]["scores"].get(str(poster["id"]), "")  # スコアを取得
+            score = judges[token]["scores"].get(str(poster["id"]), "")
             poster_data[judge_name] = score
 
         ratings_data.append(poster_data)
 
-    # DataFrame に変換
     df = pd.DataFrame(ratings_data)
 
-    # エクセル出力
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Ratings")
@@ -530,32 +478,28 @@ def generate_judge_token():
     judge_name = request.form["name"]
     token = generate_token()
     judges[token] = {"name": judge_name, "selected_posters": []}
-    save_judges(judges) # Save to JSON
+    save_judges(judges)
     return jsonify({"token": token})
 
 @app.route("/judge/<token>", methods=["GET", "POST"])
 def judge_page(token):
-    # トークンのバリデーション
     if token not in judges:
         return render_template("error.html", message="Invalid token.")
 
     judge_data = judges[token]
     judge_data["selected_posters"] = [int(poster_id) for poster_id in judge_data["selected_posters"]]
 
-    # ページネーション関連
-    page = int(request.args.get("page", 1))  # 現在のページ
-    per_page = 10  # 1ページあたりのポスター数
+    page = int(request.args.get("page", 1))
+    per_page = 10
     total_pages = ceil(len(posters) / per_page)
 
     start_idx = (page - 1) * per_page
-    end_idx = min(start_idx + per_page, len(posters))  # 範囲を安全に制限
+    end_idx = min(start_idx + per_page, len(posters))
 
-    # ページごとのポスターを取得
     available_posters = [
         p for p in posters[start_idx:end_idx] if p["id"] not in judge_data["selected_posters"]
     ]
 
-    # 選択済みポスター
     selected_posters = [
         p for p in posters if p["id"] in judge_data["selected_posters"]
     ]
